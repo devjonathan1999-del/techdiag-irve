@@ -129,4 +129,5 @@ const dist = path.join(__dirname, 'dist');
 fs.rmSync(dist, {recursive:true, force:true});
 fs.mkdirSync(dist, {recursive:true});
 fs.writeFileSync(path.join(dist, 'index.html'), output, 'utf8');
-console.log('TechDiag build generated: dist/index.html');
+fs.writeFileSync(path.join(dist, '_headers'), `/*\n  X-Content-Type-Options: nosniff\n  Referrer-Policy: strict-origin-when-cross-origin\n`, 'utf8');
+console.log('TechDiag build generated: dist/index.html + dist/_headers');
