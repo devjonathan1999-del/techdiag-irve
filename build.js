@@ -5,12 +5,12 @@ const source = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8');
 
 const css = `
 <style id="techdiag-summary-style">
-.diag-summary{margin-top:16px;border:1px solid var(--line);border-radius:18px;background:#0d1727;padding:15px}
-.diag-summary h3{margin:0 0 12px;font-size:17px}
-.diag-summary-row{padding:9px 0;border-bottom:1px solid #22314b;font-size:13px;line-height:1.45}
+.diag-summary{margin-top:18px;border:1px solid rgba(127,157,200,.13);border-radius:18px;background:rgba(9,20,34,.72);padding:17px}
+.diag-summary h3{margin:0 0 13px;font-size:17px;letter-spacing:-.01em}
+.diag-summary-row{padding:10px 0;border-bottom:1px solid rgba(127,157,200,.11);font-size:13px;line-height:1.5}
 .diag-summary-row:last-child{border-bottom:0}
-.diag-summary-row strong{display:block;color:#dce9fb;margin-bottom:3px}
-.diag-summary-row span{color:#aabbd4}
+.diag-summary-row strong{display:block;color:#dce9fb;margin-bottom:4px;font-size:12px}
+.diag-summary-row span{color:#9fb0cc}
 .copy-ok{font-size:12px;color:#a7f3d0;align-self:center}
 </style>`;
 
