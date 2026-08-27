@@ -22,8 +22,8 @@ function expectExcludes(value, label) {
 expectIncludes('F107-020', 'step mapping F107-020');
 expectIncludes('assets/f2m/107/cablage-cn12.png', 'linked schematic path');
 expectIncludes('Voir le schéma de câblage DPM / CN12', 'schematic link label');
-expectIncludes('target="_blank"', 'new-tab link behavior');
-expectIncludes('rel="noopener noreferrer"', 'safe external-link behavior');
+expectIncludes("link.target = '_blank'", 'new-tab link behavior');
+expectIncludes("link.rel = 'noopener noreferrer'", 'safe external-link behavior');
 expectIncludes('renderStepVisual', 'step-specific visual renderer');
 expectExcludes('data:image/png;base64,', 'embedded base64 image');
 
