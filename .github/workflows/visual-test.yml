@@ -23,18 +23,21 @@ jobs:
         with:
           node-version: 20
 
-      - name: Migrate F107 schematic to a real PNG
+      - name: Restore the original F107 schematic
         if: github.event_name == 'pull_request' && github.head_ref == 'fix/f107-hosted-visual-link'
         run: |
-          if [ ! -f assets/f2m/107/cablage-cn12.png ]; then
-            node -e "const fs=require('fs'),path=require('path'),dir=path.join('assets','f2m','107'),parts=fs.readdirSync(dir).filter(n=>/^cn12\\.part\\d+\\.b64$/.test(n)).sort();if(!parts.length)throw new Error('missing schematic parts');const data=parts.map(n=>fs.readFileSync(path.join(dir,n),'utf8').trim()).join('');fs.writeFileSync(path.join(dir,'cablage-cn12.png'),Buffer.from(data,'base64'));"
-            rm -f assets/f2m/107/*.b64
-            rm -rf assets/f2m/107/.upload
-            file assets/f2m/107/cablage-cn12.png
+          expected='ae77c3709771f986b98c2b631de12c73f452d26cd5b6a0452b85bd609ad22bcf'
+          current=''
+          if [ -f assets/f2m/107/cablage-cn12.png ]; then
+            current=$(sha256sum assets/f2m/107/cablage-cn12.png | cut -d' ' -f1)
+          fi
+          if [ "$current" != "$expected" ]; then
+            curl -L --fail --silent --show-error 'https://drive.google.com/uc?export=download&id=19zxERxuFLMUExDigob24MtU8lsW_9mfl' -o assets/f2m/107/cablage-cn12.png
+            echo "$expected  assets/f2m/107/cablage-cn12.png" | sha256sum -c -
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add -A assets/f2m/107
-            git commit -m "feat: store F107 schematic as hosted PNG"
+            git add assets/f2m/107/cablage-cn12.png
+            git commit -m "fix: restore original F107 wiring schematic"
             git push origin HEAD:${{ github.head_ref }}
           fi
 
