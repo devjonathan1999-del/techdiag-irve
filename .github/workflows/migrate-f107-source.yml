@@ -1,0 +1,33 @@
+name: Migrate exact F107 source asset
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout F107 branch
+        uses: actions/checkout@v4
+        with:
+          ref: fix/f107-hosted-visual-link
+          fetch-depth: 0
+
+      - name: Restore exact manufacturer schematic
+        run: |
+          mkdir -p assets/f2m/107
+          curl -L --fail --silent --show-error 'https://drive.google.com/uc?export=download&id=19zxERxuFLMUExDigob24MtU8lsW_9mfl' -o assets/f2m/107/cablage-cn12.png
+          echo 'ae77c3709771f986b98c2b631de12c73f452d26cd5b6a0452b85bd609ad22bcf  assets/f2m/107/cablage-cn12.png' | sha256sum -c -
+          file assets/f2m/107/cablage-cn12.png
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add assets/f2m/107/cablage-cn12.png
+          if ! git diff --cached --quiet; then
+            git commit -m 'fix: restore exact F107 manufacturer schematic'
+            git push origin HEAD:fix/f107-hosted-visual-link
+          fi
