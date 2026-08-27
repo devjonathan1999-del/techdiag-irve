@@ -48,9 +48,14 @@ const signature = Buffer.from([0x89,0x50,0x4e,0x47,0x0d,0x0a,0x1a,0x0a]);
 const iend = Buffer.from([0x00,0x00,0x00,0x00,0x49,0x45,0x4e,0x44,0xae,0x42,0x60,0x82]);
 if (!sourcePng.subarray(0, 8).equals(signature)) throw new Error('Source F107-020 asset is not a PNG');
 if (!sourcePng.subarray(-12).equals(iend)) throw new Error('Source F107-020 PNG is truncated');
-if (sourcePng.length < 1000) throw new Error('Source F107-020 PNG is unexpectedly small');
+
+const width = sourcePng.readUInt32BE(16);
+const height = sourcePng.readUInt32BE(20);
+if (width !== 716 || height !== 910) throw new Error(`Unexpected original schematic dimensions: ${width}x${height}`);
 
 const hash = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
+const expectedHash = 'ae77c3709771f986b98c2b631de12c73f452d26cd5b6a0452b85bd609ad22bcf';
+if (hash(sourcePng) !== expectedHash) throw new Error('Repository schematic does not match the original manufacturer image');
 if (hash(sourcePng) !== hash(distPng)) throw new Error('Build must copy the hosted schematic without altering it');
 
 console.log('Visual integration test passed for F107-020 data-driven hosted schematic link.');
