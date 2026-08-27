@@ -31,3 +31,17 @@ jobs:
           name: f107-reconstructed-schematic
           path: dist/assets/f2m/107/cablage-cn12.png
           if-no-files-found: error
+
+      - name: Reconstruct alternate schematic candidate
+        if: always()
+        run: |
+          cat assets/f2m/107/cn12v16.part*.b64 | tr -d '\n\r ' | base64 --decode > /tmp/cablage-cn12-v16.png
+          file /tmp/cablage-cn12-v16.png
+
+      - name: Preserve alternate schematic candidate
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: f107-v16-schematic
+          path: /tmp/cablage-cn12-v16.png
+          if-no-files-found: error
