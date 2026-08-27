@@ -1,0 +1,26 @@
+name: Verify F107 PR
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout F107 branch
+        uses: actions/checkout@v4
+        with:
+          ref: fix/f107-hosted-visual-link
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Run visual integration test
+        run: node visual.test.js
