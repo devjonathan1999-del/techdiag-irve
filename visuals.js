@@ -1,17 +1,41 @@
 (() => {
-  const STEP_VISUALS = {
-    'F107-020': {
-      title: 'Schéma de câblage Modbus DPM / CN12',
-      guidance: 'Consulter le schéma correspondant au DPM installé pour vérifier le câblage côté DPM et côté CN12.',
-      href: 'assets/f2m/107/cablage-cn12.png',
-      label: 'Voir le schéma de câblage DPM / CN12'
-    }
-  };
+  let visuals=[], visualsPromise=null;
 
-  function renderStepVisual(step) {
+  async function loadVisuals() {
+    if (visualsPromise) return visualsPromise;
+    visualsPromise = querySheet("Visuels_Terrain")
+      .then(rows => {
+        visuals = rows.filter(row => String(row?.Step_ID || '').trim() && String(row?.URL || '').trim());
+        return visuals;
+      })
+      .catch(error => {
+        console.warn('TechDiag: impossible de charger les visuels terrain.', error);
+        visuals = [];
+        return visuals;
+      });
+    return visualsPromise;
+  }
+
+  function findStepVisual(step) {
+    const stepId = String(step?.Step_ID || '').trim();
+    const procedureId = String(step?.Procedure_ID || '').trim();
+    return visuals.find(visual => {
+      const sameStep = String(visual.Step_ID || '').trim() === stepId;
+      const visualProcedure = String(visual.Procedure_ID || '').trim();
+      return sameStep && (!visualProcedure || visualProcedure === procedureId);
+    }) || null;
+  }
+
+  async function renderStepVisual(step) {
     document.getElementById('stepVisual')?.remove();
-    const visual = STEP_VISUALS[String(step?.Step_ID || '').trim()];
-    if (!visual) return;
+    const stepId = String(step?.Step_ID || '').trim();
+    if (!stepId) return;
+
+    await loadVisuals();
+    if (String(currentStepId || '').trim() !== stepId) return;
+
+    const visual = findStepVisual(step);
+    if (!visual || !String(visual.URL || '').trim()) return;
 
     const card = document.createElement('div');
     card.id = 'stepVisual';
@@ -22,23 +46,27 @@
     card.style.background = 'rgba(9,20,34,.72)';
 
     const title = document.createElement('strong');
-    title.textContent = visual.title;
+    title.textContent = visual.Sujet || 'Visuel technique';
     title.style.display = 'block';
     title.style.marginBottom = '8px';
     title.style.color = '#dceaff';
 
-    const guidance = document.createElement('div');
-    guidance.textContent = visual.guidance;
-    guidance.style.marginBottom = '12px';
-    guidance.style.fontSize = '13px';
-    guidance.style.lineHeight = '1.5';
-    guidance.style.color = '#a8bad4';
+    const guidanceText = visual['Utilisation TechDiag'] || visual['Éléments visibles'] || visual.Note || '';
+    if (guidanceText) {
+      const guidance = document.createElement('div');
+      guidance.textContent = guidanceText;
+      guidance.style.marginBottom = '12px';
+      guidance.style.fontSize = '13px';
+      guidance.style.lineHeight = '1.5';
+      guidance.style.color = '#a8bad4';
+      card.appendChild(guidance);
+    }
 
     const link = document.createElement('a');
-    link.href = visual.href;
+    link.href = visual.URL;
     link.target = '_blank';
     link.rel = 'noopener noreferrer';
-    link.textContent = '📎 ' + visual.label;
+    link.textContent = '📎 ' + (visual['Légende'] || 'Voir le visuel');
     link.style.display = 'inline-flex';
     link.style.alignItems = 'center';
     link.style.gap = '8px';
@@ -50,7 +78,7 @@
     link.style.fontWeight = '700';
     link.style.textDecoration = 'none';
 
-    card.append(title, guidance, link);
+    card.append(title, link);
     document.getElementById('question')?.insertAdjacentElement('afterend', card);
   }
 
