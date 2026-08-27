@@ -50,6 +50,7 @@
     title.style.display = 'block';
     title.style.marginBottom = '8px';
     title.style.color = '#dceaff';
+    card.appendChild(title);
 
     const guidanceText = visual['Utilisation TechDiag'] || visual['Éléments visibles'] || visual.Note || '';
     if (guidanceText) {
@@ -77,8 +78,8 @@
     link.style.color = '#dceaff';
     link.style.fontWeight = '700';
     link.style.textDecoration = 'none';
+    card.appendChild(link);
 
-    card.append(title, link);
     document.getElementById('question')?.insertAdjacentElement('afterend', card);
   }
 
