@@ -30,6 +30,9 @@ jobs:
         with:
           node-version: 20
 
+      - name: Test step visuals
+        run: node visual.test.js
+
       - name: Build TechDiag
         run: node build.js
 
