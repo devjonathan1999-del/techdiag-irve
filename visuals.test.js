@@ -40,6 +40,15 @@ test('raw index supports step visuals even when Cloudflare serves the repository
   assert.match(source, /visual-open/);
 });
 
+test('embedded CN12 raster is a complete PNG', () => {
+  const svg = fs.readFileSync('assets/f2m/107/cn12-gavazzi.svg', 'utf8');
+  const match = svg.match(/data:image\/png;base64,([^"']+)/);
+  assert.ok(match, 'CN12 SVG must contain an embedded PNG');
+  const png = Buffer.from(match[1], 'base64');
+  assert.deepEqual([...png.subarray(0, 8)], [137,80,78,71,13,10,26,10]);
+  assert.deepEqual([...png.subarray(-12)], [0,0,0,0,73,69,78,68,174,66,96,130]);
+});
+
 test('build keeps a single visual runtime when source already contains it', () => {
   execFileSync(process.execPath, ['build.js'], { stdio:'pipe' });
   const built = fs.readFileSync('dist/index.html', 'utf8');
