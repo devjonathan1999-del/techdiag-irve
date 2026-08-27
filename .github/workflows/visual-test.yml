@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   visual-test:
@@ -22,24 +22,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-
-      - name: Restore the original F107 schematic
-        if: github.event_name == 'pull_request' && github.head_ref == 'fix/f107-hosted-visual-link'
-        run: |
-          expected='ae77c3709771f986b98c2b631de12c73f452d26cd5b6a0452b85bd609ad22bcf'
-          current=''
-          if [ -f assets/f2m/107/cablage-cn12.png ]; then
-            current=$(sha256sum assets/f2m/107/cablage-cn12.png | cut -d' ' -f1)
-          fi
-          if [ "$current" != "$expected" ]; then
-            curl -L --fail --silent --show-error 'https://drive.google.com/uc?export=download&id=19zxERxuFLMUExDigob24MtU8lsW_9mfl' -o assets/f2m/107/cablage-cn12.png
-            echo "$expected  assets/f2m/107/cablage-cn12.png" | sha256sum -c -
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add assets/f2m/107/cablage-cn12.png
-            git commit -m "fix: restore original F107 wiring schematic"
-            git push origin HEAD:${{ github.head_ref }}
-          fi
 
       - name: Test step visuals
         run: node visual.test.js
