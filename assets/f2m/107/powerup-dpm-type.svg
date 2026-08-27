@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="756" height="1644" viewBox="0 0 189 411" role="img" aria-labelledby="title desc">
+  <title id="title">PowerUp - Power Management - DPM PowerMeter type</title>
+  <desc id="desc">Reproduction lisible de l'écran Power Management montrant le champ DPM PowerMeter type.</desc>
+  <rect width="189" height="411" fill="#ffffff"/>
+  <rect x="0" y="0" width="189" height="59" fill="#2b2b2b"/>
+  <text x="9" y="11" font-family="Arial, sans-serif" font-size="6" font-weight="700" fill="#ffffff">12:17</text>
+  <text x="94.5" y="48" text-anchor="middle" font-family="Arial, sans-serif" font-size="7" font-weight="700" fill="#ffffff">Power Management</text>
+  <path d="M21 46 L15 46 M15 46 L18 43 M15 46 L18 49" fill="none" stroke="#ffffff" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="153" cy="10" r="1.3" fill="#ffffff" opacity="0.75"/><circle cx="159" cy="10" r="1.3" fill="#ffffff" opacity="0.75"/><rect x="166" y="7" width="10" height="5" rx="1" fill="none" stroke="#ffffff" stroke-width="0.8"/><rect x="176.5" y="8.5" width="1" height="2" fill="#ffffff"/><rect x="167.5" y="8" width="6" height="3" fill="#ffffff" opacity="0.8"/>
+  <text x="13" y="91" font-family="Arial, sans-serif" font-size="6.2" font-weight="700" fill="#252525">Dynamic Power Management</text>
+  <path d="M168 89 l3 3 l3 -3" fill="none" stroke="#333333" stroke-width="0.8"/>
+  <text x="13" y="116" font-family="Arial, sans-serif" font-size="6.2" font-weight="700" fill="#252525">Power supply</text>
+  <text x="13" y="134" font-family="Arial, sans-serif" font-size="6" fill="#333333">Single-phase</text>
+  <line x1="13" y1="151" x2="176" y2="151" stroke="#e3e3e3" stroke-width="0.8"/>
+  <text x="13" y="173" font-family="Arial, sans-serif" font-size="6.2" font-weight="700" fill="#252525">Rotary switch position</text>
+  <circle cx="34" cy="204" r="13" fill="#ffffff" stroke="#dddddd" stroke-width="0.7"/>
+  <circle cx="34" cy="204" r="2" fill="#999999"/>
+  <path d="M34 204 L31 195" stroke="#222222" stroke-width="1.2" stroke-linecap="round"/>
+  <g font-family="Arial, sans-serif" font-size="4.2" fill="#777777" text-anchor="middle"><text x="34" y="186">0</text><text x="42" y="188">1</text><text x="48" y="193">2</text><text x="51" y="201">3</text><text x="49" y="210">4</text><text x="43" y="216">5</text><text x="34" y="219">6</text><text x="25" y="216">7</text><text x="19" y="210">8</text><text x="17" y="201">9</text><text x="20" y="193">A</text><text x="26" y="188">B</text></g>
+  <text x="143" y="198" font-family="Arial, sans-serif" font-size="5.5" fill="#333333">Max A 62</text>
+  <text x="143" y="210" font-family="Arial, sans-serif" font-size="5.5" fill="#333333">Max kW 4.3</text>
+  <line x1="13" y1="239" x2="176" y2="239" stroke="#e3e3e3" stroke-width="0.8"/>
+  <text x="13" y="261" font-family="Arial, sans-serif" font-size="6.2" font-weight="700" fill="#252525">DPM PowerMeter type</text>
+  <text x="13" y="279" font-family="Arial, sans-serif" font-size="5.8" fill="#252525">Gavazzi EM111DINAV51XS1X</text>
+  <path d="M168 276 l3 3 l3 -3" fill="none" stroke="#333333" stroke-width="0.8"/>
+  <text x="13" y="303" font-family="Arial, sans-serif" font-size="6.2" font-weight="700" fill="#252525">DPM limit</text>
+  <text x="175" y="303" text-anchor="end" font-family="Arial, sans-serif" font-size="5.8" fill="#252525">10.6 kW</text>
+  <line x1="14" y1="317" x2="176" y2="317" stroke="#bdbdbd" stroke-width="5" stroke-linecap="round"/>
+  <line x1="14" y1="317" x2="84" y2="317" stroke="#444444" stroke-width="5" stroke-linecap="round"/>
+  <circle cx="84" cy="317" r="6.5" fill="#333333"/>
+  <text x="13" y="333" font-family="Arial, sans-serif" font-size="5.3" fill="#555555">1.4 kW</text>
+  <text x="176" y="333" text-anchor="end" font-family="Arial, sans-serif" font-size="5.3" fill="#555555">23 kW</text>
+  <line x1="13" y1="340" x2="176" y2="340" stroke="#e3e3e3" stroke-width="0.8"/>
+  <text x="13" y="357" font-family="Arial, sans-serif" font-size="6.2" font-weight="700" fill="#252525">Current Transformer [Ratio/A]</text>
+  <text x="176" y="357" text-anchor="end" font-family="Arial, sans-serif" font-size="5.8" fill="#252525">20</text>
+  <rect x="14" y="367" width="162" height="20" rx="10" fill="#bdbdbd"/>
+  <text x="95" y="380" text-anchor="middle" font-family="Arial, sans-serif" font-size="5.5" font-weight="700" fill="#ffffff">SEND</text>
+  <text x="13" y="399" font-family="Arial, sans-serif" font-size="5.3" fill="#555555">1</text>
+  <text x="176" y="399" text-anchor="end" font-family="Arial, sans-serif" font-size="5.3" fill="#555555">60</text>
+</svg>
