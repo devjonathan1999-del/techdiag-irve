@@ -23,3 +23,11 @@ jobs:
 
       - name: Test step visuals
         run: node visual.test.js
+
+      - name: Preserve reconstructed schematic for migration
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: f107-reconstructed-schematic
+          path: dist/assets/f2m/107/cablage-cn12.png
+          if-no-files-found: error
