@@ -1,9 +1,10 @@
 (() => {
   const STEP_VISUALS = {
     'F107-020': {
-      title: 'Schéma de câblage Modbus DPM ↔ CN12',
-      guidance: 'Choisir le schéma correspondant au DPM installé puis vérifier la correspondance des bornes entre le DPM et le CN12 de la Wallbox.',
-      src: 'data:image/png;base64,__CN12_IMAGE_BASE64__'
+      title: 'Schéma de câblage Modbus DPM / CN12',
+      guidance: 'Consulter le schéma correspondant au DPM installé pour vérifier le câblage côté DPM et côté CN12.',
+      href: 'assets/f2m/107/cablage-cn12.png',
+      label: 'Voir le schéma de câblage DPM / CN12'
     }
   };
 
@@ -33,18 +34,23 @@
     guidance.style.lineHeight = '1.5';
     guidance.style.color = '#a8bad4';
 
-    const image = document.createElement('img');
-    image.src = visual.src;
-    image.alt = visual.title;
-    image.style.display = 'block';
-    image.style.width = '100%';
-    image.style.height = 'auto';
-    image.style.maxWidth = '716px';
-    image.style.margin = '0 auto';
-    image.style.borderRadius = '10px';
-    image.style.background = '#fff';
+    const link = document.createElement('a');
+    link.href = visual.href;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    link.textContent = '📎 ' + visual.label;
+    link.style.display = 'inline-flex';
+    link.style.alignItems = 'center';
+    link.style.gap = '8px';
+    link.style.padding = '11px 14px';
+    link.style.border = '1px solid rgba(56,189,248,.35)';
+    link.style.borderRadius = '12px';
+    link.style.background = 'rgba(14,165,233,.10)';
+    link.style.color = '#dceaff';
+    link.style.fontWeight = '700';
+    link.style.textDecoration = 'none';
 
-    card.append(title, guidance, image);
+    card.append(title, guidance, link);
     document.getElementById('question')?.insertAdjacentElement('afterend', card);
   }
 
