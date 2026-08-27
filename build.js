@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 const source = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8');
+const visualsCore = fs.readFileSync(path.join(__dirname, 'visuals.js'), 'utf8');
 
 const css = `
 <style id="techdiag-summary-style">
@@ -13,6 +14,78 @@ const css = `
 .diag-summary-row span{color:#9fb0cc}
 .copy-ok{font-size:12px;color:#a7f3d0;align-self:center}
 </style>`;
+
+const visualCss = `
+<style id="techdiag-visuals-style">
+#stepVisuals:empty{display:none}
+.stepvisuals{display:grid;grid-template-columns:minmax(0,430px);gap:12px;margin-top:16px}
+.visual-card{margin:0;border:1px solid rgba(56,213,255,.18);border-radius:16px;background:rgba(9,20,34,.76);padding:12px;overflow:hidden}
+.visual-card img{display:block;width:100%;max-height:440px;object-fit:contain;border-radius:11px;background:#fff;border:1px solid rgba(127,157,200,.12)}
+.visual-card figcaption{display:flex;flex-direction:column;gap:4px;margin-top:10px;font-size:12px;line-height:1.4;color:#9fb0cc}
+.visual-card figcaption strong{font-size:12px;color:#dce9fb}
+.visual-open{display:inline-flex;align-items:center;justify-content:center;margin-top:10px;padding:8px 11px;border-radius:10px;border:1px solid rgba(56,213,255,.28);background:rgba(56,213,255,.07);color:#bdeeff;font-size:12px;font-weight:800;text-decoration:none}
+.visual-open:hover{border-color:rgba(56,213,255,.55);background:rgba(56,213,255,.11)}
+@media(max-width:760px){.stepvisuals{grid-template-columns:1fr}.visual-card img{max-height:360px}}
+</style>`;
+
+const visualEnhancement = `
+<script id="techdiag-visuals-script">
+(() => {
+  let visualIndex = {};
+
+  function ensureVisualUI(){
+    const hint = document.getElementById('hint');
+    if(!hint || document.getElementById('stepVisuals')) return;
+    const root = document.createElement('div');
+    root.id = 'stepVisuals';
+    hint.insertAdjacentElement('afterend', root);
+  }
+
+  function renderStepVisuals(step){
+    ensureVisualUI();
+    const root = document.getElementById('stepVisuals');
+    if(!root || !window.TechDiagVisuals || !step){
+      if(root) root.innerHTML = '';
+      return;
+    }
+    const rows = window.TechDiagVisuals.getStepVisuals(visualIndex, step.Procedure_ID, step.Step_ID);
+    root.innerHTML = window.TechDiagVisuals.renderStepVisualsHtml(rows);
+  }
+
+  function renderCurrentStepVisuals(){
+    if(typeof byStep !== 'undefined' && typeof currentStepId !== 'undefined' && currentStepId){
+      renderStepVisuals(byStep[currentStepId]);
+    }
+  }
+
+  async function loadStepVisuals(){
+    if(typeof querySheet !== 'function' || !window.TechDiagVisuals) return;
+    try{
+      const rows = await querySheet('Visuels_Terrain');
+      visualIndex = window.TechDiagVisuals.indexVisuals(rows);
+      renderCurrentStepVisuals();
+    }catch(err){
+      console.warn('TechDiag : impossible de charger les visuels terrain.', err);
+    }
+  }
+
+  ensureVisualUI();
+
+  if(typeof renderStep === 'function'){
+    const originalRenderStep = renderStep;
+    renderStep = function(step){
+      originalRenderStep(step);
+      renderStepVisuals(step);
+    };
+  }
+
+  if(window.google && google.charts){
+    google.charts.setOnLoadCallback(loadStepVisuals);
+  }else{
+    window.addEventListener('load', loadStepVisuals, {once:true});
+  }
+})();
+</script>`;
 
 const enhancement = `
 <script id="techdiag-summary-script">
@@ -122,12 +195,16 @@ const enhancement = `
 </script>`;
 
 let output = source;
-output = output.replace('</head>', css + '\n</head>');
-output = output.replace('</body>', enhancement + '\n</body>');
+output = output.replace('</head>', css + '\n' + visualCss + '\n</head>');
+output = output.replace('</body>', '<script id="techdiag-visuals-core">\n' + visualsCore + '\n</script>\n' + visualEnhancement + '\n' + enhancement + '\n</body>');
 
 const dist = path.join(__dirname, 'dist');
 fs.rmSync(dist, {recursive:true, force:true});
 fs.mkdirSync(dist, {recursive:true});
 fs.writeFileSync(path.join(dist, 'index.html'), output, 'utf8');
 fs.writeFileSync(path.join(dist, '_headers'), `/*\n  X-Content-Type-Options: nosniff\n  Referrer-Policy: strict-origin-when-cross-origin\n`, 'utf8');
-console.log('TechDiag build generated: dist/index.html + dist/_headers');
+
+const assets = path.join(__dirname, 'assets');
+if(fs.existsSync(assets)) fs.cpSync(assets, path.join(dist, 'assets'), {recursive:true});
+
+console.log('TechDiag build generated: dist/index.html + dist/_headers + dist/assets');
