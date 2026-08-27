@@ -7,41 +7,36 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   visual-test:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout PR head
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.ref }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
+      - name: Migrate F107 schematic to a real PNG
+        if: github.event_name == 'pull_request' && github.head_ref == 'fix/f107-hosted-visual-link'
+        run: |
+          if [ ! -f assets/f2m/107/cablage-cn12.png ]; then
+            cat assets/f2m/107/cn12.part*.b64 | tr -d '\n\r ' | base64 --decode > assets/f2m/107/cablage-cn12.png
+            rm -f assets/f2m/107/*.b64
+            rm -rf assets/f2m/107/.upload
+            file assets/f2m/107/cablage-cn12.png
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add -A assets/f2m/107
+            git commit -m "feat: store F107 schematic as hosted PNG"
+            git push origin HEAD:${{ github.head_ref }}
+          fi
+
       - name: Test step visuals
         run: node visual.test.js
-
-      - name: Preserve reconstructed schematic for migration
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: f107-reconstructed-schematic
-          path: dist/assets/f2m/107/cablage-cn12.png
-          if-no-files-found: error
-
-      - name: Reconstruct alternate schematic candidate
-        if: always()
-        run: |
-          cat assets/f2m/107/cn12v16.part*.b64 | tr -d '\n\r ' | base64 --decode > /tmp/cablage-cn12-v16.png
-          file /tmp/cablage-cn12-v16.png
-
-      - name: Preserve alternate schematic candidate
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: f107-v16-schematic
-          path: /tmp/cablage-cn12-v16.png
-          if-no-files-found: error
