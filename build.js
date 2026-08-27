@@ -134,17 +134,9 @@ fs.mkdirSync(dist, {recursive:true});
 fs.writeFileSync(path.join(dist, 'index.html'), output, 'utf8');
 fs.writeFileSync(path.join(dist, '_headers'), `/*\n  X-Content-Type-Options: nosniff\n  Referrer-Policy: strict-origin-when-cross-origin\n`, 'utf8');
 
-const schematicSourceDir = path.join(__dirname, 'assets', 'f2m', '107');
-const schematicParts = fs.readdirSync(schematicSourceDir)
-  .filter(name => /^cn12\.part\d+\.b64$/.test(name))
-  .sort();
-if (!schematicParts.length) throw new Error('F107-020 schematic source parts are missing');
-const schematicBase64 = schematicParts
-  .map(name => fs.readFileSync(path.join(schematicSourceDir, name), 'utf8').trim())
-  .join('');
-const schematicBytes = Buffer.from(schematicBase64, 'base64');
-const schematicDistDir = path.join(dist, 'assets', 'f2m', '107');
-fs.mkdirSync(schematicDistDir, {recursive:true});
-fs.writeFileSync(path.join(schematicDistDir, 'cablage-cn12.png'), schematicBytes);
+const assetsSource = path.join(__dirname, 'assets');
+if (fs.existsSync(assetsSource)) {
+  fs.cpSync(assetsSource, path.join(dist, 'assets'), { recursive: true });
+}
 
-console.log('TechDiag build generated: dist/index.html + hosted schematic asset');
+console.log('TechDiag build generated: dist/index.html + hosted assets');
