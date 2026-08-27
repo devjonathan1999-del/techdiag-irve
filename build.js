@@ -130,11 +130,4 @@ fs.rmSync(dist, {recursive:true, force:true});
 fs.mkdirSync(dist, {recursive:true});
 fs.writeFileSync(path.join(dist, 'index.html'), output, 'utf8');
 fs.writeFileSync(path.join(dist, '_headers'), `/*\n  X-Content-Type-Options: nosniff\n  Referrer-Policy: strict-origin-when-cross-origin\n`, 'utf8');
-
-const visuals = path.join(__dirname, 'visuals.js');
-if(fs.existsSync(visuals)) fs.copyFileSync(visuals, path.join(dist, 'visuals.js'));
-
-const assets = path.join(__dirname, 'assets');
-if(fs.existsSync(assets)) fs.cpSync(assets, path.join(dist, 'assets'), {recursive:true});
-
-console.log('TechDiag build generated: dist/index.html + dist/_headers + dist/visuals.js + dist/assets');
+console.log('TechDiag build generated: dist/index.html + dist/_headers');
