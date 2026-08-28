@@ -19,7 +19,25 @@ const enhancement = `
 <script id="techdiag-summary-script">
 (() => {
   const tdEsc = (value) => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
-  const tdPretty = (key) => String(key ?? '').replaceAll('_',' ').replace(/\\b\\w/g, m => m.toUpperCase());
+  const TD_SUMMARY_ACCENTS = {
+    controle:'contrôle', controles:'contrôles', cable:'câble', cables:'câbles',
+    endommage:'endommagé', endommagee:'endommagée', redemarrage:'redémarrage',
+    apres:'après', reglage:'réglage', reglages:'réglages', reglee:'réglée',
+    mesure:'mesure', mesuree:'mesurée', detecte:'détecté', detectee:'détectée',
+    vehicule:'véhicule', securite:'sécurité', arret:'arrêt', reinitialisation:'réinitialisation',
+    connectivite:'connectivité', entree:'entrée'
+  };
+  const TD_SUMMARY_UPPER = new Set(['t2','dpm','cp','pp','tic','db','agcp','rfid','ble','wifi']);
+  const tdPretty = (key) => {
+    let label = String(key ?? '').replaceAll('_',' ').trim().replace(/\\s+\\d+$/,'');
+    label = label.split(/\\s+/).filter(Boolean).map(word => {
+      const lower = word.toLowerCase();
+      if(TD_SUMMARY_UPPER.has(lower) || /^cn\\d+$/i.test(word)) return word.toUpperCase();
+      return TD_SUMMARY_ACCENTS[lower] || lower;
+    }).join(' ');
+    return label ? label.charAt(0).toUpperCase() + label.slice(1) : '';
+  };
+  const tdSummaryDataEntries = () => Object.entries(collected || {}).filter(([key]) => !/^conclusion(?:_|$)/i.test(key));
 
   function ensureSummaryUI(){
     const final = document.getElementById('final');
@@ -51,7 +69,7 @@ const enhancement = `
     const box = document.getElementById('diagSummary');
     if(!box) return;
 
-    const values = Object.entries(collected || {});
+    const values = tdSummaryDataEntries();
     const dataHtml = values.length
       ? '<div class="diag-summary-row"><strong>Données collectées</strong></div>' + values.map(([k,v]) => '<div class="diag-summary-row"><strong>'+tdEsc(tdPretty(k))+'</strong><span>'+tdEsc(v)+'</span></div>').join('')
       : '';
@@ -64,15 +82,14 @@ const enhancement = `
       '<div class="diag-summary-row"><strong>Diagnostic</strong><span>'+tdEsc(activeProcedureTitle || '')+'</span></div>' +
       dataHtml +
       '<div class="diag-summary-row"><strong>Parcours réalisé</strong></div>' + stepsHtml +
-      '<div class="diag-summary-row"><strong>Conclusion</strong><span>'+tdEsc(title)+(text ? ' — '+tdEsc(text) : '')+'</span></div>';
+      '<div class="diag-summary-row"><strong>Conclusion</strong><span>'+tdEsc(title)+'</span></div>';
   }
 
   function buildDiagnosticText(){
     const title = document.getElementById('finalTitle')?.textContent || 'Diagnostic terminé';
-    const conclusion = document.querySelector('#finalBox .result p')?.textContent || '';
-    const lines = ['TECHDIAG – RÉSUMÉ DU DIAGNOSTIC','', 'Diagnostic : '+(activeProcedureTitle || ''), 'Procedure_ID : '+(activeProcedureId || '')];
+    const lines = ['TECHDIAG – RÉSUMÉ DU DIAGNOSTIC','', 'Diagnostic : '+(activeProcedureTitle || ''), 'ID procédure : '+(activeProcedureId || '')];
 
-    const values = Object.entries(collected || {});
+    const values = tdSummaryDataEntries();
     if(values.length){
       lines.push('', 'DONNÉES COLLECTÉES');
       values.forEach(([k,v]) => lines.push('- '+tdPretty(k)+' : '+v));
@@ -84,7 +101,7 @@ const enhancement = `
       lines.push('   → '+x.answer);
     });
 
-    lines.push('', 'CONCLUSION', title + (conclusion ? ' — '+conclusion : ''));
+    lines.push('', 'CONCLUSION', title);
     return lines.join('\\n');
   }
 
