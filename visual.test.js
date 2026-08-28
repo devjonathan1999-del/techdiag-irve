@@ -30,6 +30,14 @@ expectExcludes('const STEP_VISUALS', 'hardcoded visual mapping');
 expectExcludes('data:image/png;base64,', 'embedded base64 image');
 expectExcludes("'F107-020':", 'hardcoded F107-020 visual entry');
 
+// Diagnostic summary regression checks.
+// Internal snake_case keys must never leak into the copied report as crude labels.
+expectIncludes('const TD_SUMMARY_ACCENTS', 'French summary label normalization');
+expectIncludes("/^conclusion(?:_|$)/i.test(key)", 'conclusion fields excluded from collected data');
+expectIncludes("replace(/\\s+\\d+$/,'')", 'technical numeric suffix removed from collected-data labels');
+expectIncludes("lines.push('', 'CONCLUSION', title);", 'copied conclusion contains only the actionable conclusion');
+expectExcludes("title + (conclusion ? ' — '+conclusion : '')", 'internal interpretation appended to copied conclusion');
+
 const sourceAsset = path.join('assets', 'f2m', '107', 'cablage-cn12.png');
 if (!fs.existsSync(sourceAsset)) throw new Error('Source F107-020 PNG asset is missing from repository assets');
 
@@ -58,4 +66,4 @@ const expectedHash = 'ae77c3709771f986b98c2b631de12c73f452d26cd5b6a0452b85bd609a
 if (hash(sourcePng) !== expectedHash) throw new Error('Repository schematic does not match the original manufacturer image');
 if (hash(sourcePng) !== hash(distPng)) throw new Error('Build must copy the hosted schematic without altering it');
 
-console.log('Visual integration test passed for F107-020 data-driven hosted schematic link.');
+console.log('Visual integration test passed for F107-020 data-driven hosted schematic link and diagnostic summary formatting.');
