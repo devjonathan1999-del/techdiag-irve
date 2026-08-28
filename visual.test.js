@@ -30,6 +30,14 @@ expectExcludes('const STEP_VISUALS', 'hardcoded visual mapping');
 expectExcludes('data:image/png;base64,', 'embedded base64 image');
 expectExcludes("'F107-020':", 'hardcoded F107-020 visual entry');
 
+// Public manufacturer documentation must stay data-driven from Sources_Public.
+expectIncludes('querySheet("Sources_Public")', 'Sources_Public documentation source');
+expectIncludes('renderManufacturerDocs', 'manufacturer documentation renderer');
+expectIncludes('📘 Documentation fabricant', 'manufacturer documentation action');
+expectIncludes("docLink.target = '_blank'", 'manufacturer documentation opens in a new tab');
+expectIncludes("docLink.rel = 'noopener noreferrer'", 'safe manufacturer documentation link');
+expectExcludes('PKM.000013_08-ePro-Installation-Manual-F2M-Charge.pdf', 'hardcoded Free2move manual URL in application code');
+
 // Diagnostic summary regression checks.
 // Internal snake_case keys must never leak into the copied report as crude labels.
 expectIncludes('const TD_SUMMARY_ACCENTS', 'French summary label normalization');
@@ -83,4 +91,4 @@ const expectedHash = 'ae77c3709771f986b98c2b631de12c73f452d26cd5b6a0452b85bd609a
 if (hash(sourcePng) !== expectedHash) throw new Error('Repository schematic does not match the original manufacturer image');
 if (hash(sourcePng) !== hash(distPng)) throw new Error('Build must copy the hosted schematic without altering it');
 
-console.log('Visual integration test passed for F107-020 data-driven hosted schematic link, F107-040 PowerUp capture cleanup, and diagnostic summary formatting.');
+console.log('Visual integration test passed for F107 visuals, public manufacturer documentation, and diagnostic summary formatting.');
