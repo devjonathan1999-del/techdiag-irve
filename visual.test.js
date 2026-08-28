@@ -47,6 +47,23 @@ if (legacyBase64Parts.length) {
   throw new Error(`Legacy base64 schematic parts must be removed: ${legacyBase64Parts.join(', ')}`);
 }
 
+// F107-040 must use the user-provided PowerUp capture under a stable filename.
+const powerUpAsset = path.join(sourceDir, 'powerup-dpm-type.png');
+if (!fs.existsSync(powerUpAsset)) throw new Error('Source F107-040 PowerUp PNG asset is missing from repository assets');
+const pngNames = fs.readdirSync(sourceDir).filter(name => name.toLowerCase().endsWith('.png')).sort();
+const expectedPngNames = ['cablage-cn12.png', 'powerup-dpm-type.png'];
+if (JSON.stringify(pngNames) !== JSON.stringify(expectedPngNames)) {
+  throw new Error(`Unused F107 PNG assets must be removed. Found: ${pngNames.join(', ')}`);
+}
+const gitBlobSha = bytes => crypto.createHash('sha1')
+  .update(Buffer.from(`blob ${bytes.length}\0`))
+  .update(bytes)
+  .digest('hex');
+const expectedPowerUpBlobSha = 'cdbee6f258d43723b406209802420f8b8bc259cd';
+if (gitBlobSha(fs.readFileSync(powerUpAsset)) !== expectedPowerUpBlobSha) {
+  throw new Error('F107-040 powerup-dpm-type.png must match the user-provided 2026-08-28 221308 capture');
+}
+
 const distAsset = path.join('dist', 'assets', 'f2m', '107', 'cablage-cn12.png');
 if (!fs.existsSync(distAsset)) throw new Error('Hosted F107-020 schematic asset is missing from dist');
 
@@ -66,4 +83,4 @@ const expectedHash = 'ae77c3709771f986b98c2b631de12c73f452d26cd5b6a0452b85bd609a
 if (hash(sourcePng) !== expectedHash) throw new Error('Repository schematic does not match the original manufacturer image');
 if (hash(sourcePng) !== hash(distPng)) throw new Error('Build must copy the hosted schematic without altering it');
 
-console.log('Visual integration test passed for F107-020 data-driven hosted schematic link and diagnostic summary formatting.');
+console.log('Visual integration test passed for F107-020 data-driven hosted schematic link, F107-040 PowerUp capture cleanup, and diagnostic summary formatting.');
