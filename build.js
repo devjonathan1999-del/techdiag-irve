@@ -7,18 +7,28 @@ const manufacturerDocs = fs.readFileSync(path.join(__dirname, 'documentation.js'
 
 const css = `
 <style id="techdiag-summary-style">
-.diag-summary{margin-top:18px;border:1px solid rgba(127,157,200,.13);border-radius:18px;background:rgba(9,20,34,.72);padding:17px}
-.diag-summary h3{margin:0 0 13px;font-size:17px;letter-spacing:-.01em}
-.diag-summary-row{padding:10px 0;border-bottom:1px solid rgba(127,157,200,.11);font-size:13px;line-height:1.5}
+.diag-summary{margin-top:22px}
+.diag-summary h3{margin:0 0 14px;font-size:16px;font-weight:600;letter-spacing:-.01em}
+.summary-data{border:1px solid var(--line-soft);border-radius:16px;background:var(--panel3);padding:20px;margin-bottom:16px}
+.summary-values{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 24px;margin:0}
+.summary-values>div{min-width:0;overflow-wrap:anywhere}
+.summary-values dt{font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:4px}
+.summary-values dd{margin:0;font-size:15px;color:var(--text);line-height:1.5;white-space:pre-line}
+.summary-path ol{padding:4px 20px 4px 42px;margin:0}
+.diag-summary-row{padding:14px 0;border-bottom:1px solid var(--line-soft);font-size:14px;line-height:1.6;overflow-wrap:anywhere}
 .diag-summary-row:last-child{border-bottom:0}
-.diag-summary-row strong{display:block;color:#dce9fb;margin-bottom:4px;font-size:12px}
-.diag-summary-row span{color:#9fb0cc}
-.copy-ok{font-size:12px;color:#a7f3d0;align-self:center}
+.diag-summary-row strong{display:block;font-weight:500;color:var(--muted);margin-bottom:5px}
+.diag-summary-row span{color:var(--text);white-space:pre-line}
+.summary-empty{font-size:13px;color:var(--muted);padding:16px}
+.copy-ok{font-size:13px;color:#a7f3d0;align-self:center}
+.copy-ok.error{color:#fecdd3}
+@media(max-width:600px){.summary-values{grid-template-columns:1fr}.summary-data{padding:16px}}
 </style>`;
 
 const enhancement = `
 <script id="techdiag-summary-script">
 (() => {
+  let summaryVersion = 0, copyFeedbackTimer = null;
   const tdEsc = (value) => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
   const TD_SUMMARY_ACCENTS = {
     controle:'contrôle', controles:'contrôles', cable:'câble', cables:'câbles',
@@ -47,7 +57,7 @@ const enhancement = `
     const summary = document.createElement('div');
     summary.id = 'diagSummary';
     summary.className = 'diag-summary';
-    final.insertBefore(summary, btns || null);
+    final.appendChild(summary);
 
     if(btns){
       const copy = document.createElement('button');
@@ -61,6 +71,8 @@ const enhancement = `
       status.id = 'copyStatus';
       status.className = 'copy-ok hidden';
       status.textContent = 'Copié ✓';
+      status.setAttribute('role', 'status');
+      status.setAttribute('aria-live', 'polite');
       btns.appendChild(status);
     }
   }
@@ -69,26 +81,30 @@ const enhancement = `
     ensureSummaryUI();
     const box = document.getElementById('diagSummary');
     if(!box) return;
+    summaryVersion += 1;
+    clearTimeout(copyFeedbackTimer);
+    document.getElementById('copyStatus')?.classList.add('hidden');
 
     const values = tdSummaryDataEntries();
     const dataHtml = values.length
-      ? '<div class="diag-summary-row"><strong>Données collectées</strong></div>' + values.map(([k,v]) => '<div class="diag-summary-row"><strong>'+tdEsc(tdPretty(k))+'</strong><span>'+tdEsc(v)+'</span></div>').join('')
+      ? '<section class="summary-data" aria-labelledby="summaryDataTitle"><h3 id="summaryDataTitle">Données collectées</h3><dl class="summary-values">' + values.map(([k,v]) => '<div><dt>'+tdEsc(tdPretty(k))+'</dt><dd>'+tdEsc(v)+'</dd></div>').join('') + '</dl></section>'
       : '';
 
     const stepsHtml = (reportLog && reportLog.length)
-      ? reportLog.map((x,i) => '<div class="diag-summary-row"><strong>'+(i+1)+'. '+tdEsc(x.question)+'</strong><span>→ '+tdEsc(x.answer)+'</span></div>').join('')
-      : '<div class="diag-summary-row"><span>Aucune étape enregistrée.</span></div>';
+      ? '<ol>' + reportLog.map(x => '<li class="diag-summary-row"><strong>'+tdEsc(x.question)+'</strong><span>'+tdEsc(x.answer)+'</span></li>').join('') + '</ol>'
+      : '<p class="summary-empty">Aucune étape enregistrée.</p>';
 
-    box.innerHTML = '<h3>Résumé du diagnostic</h3>' +
-      '<div class="diag-summary-row"><strong>Diagnostic</strong><span>'+tdEsc(activeProcedureTitle || '')+'</span></div>' +
-      dataHtml +
-      '<div class="diag-summary-row"><strong>Parcours réalisé</strong></div>' + stepsHtml +
-      '<div class="diag-summary-row"><strong>Conclusion</strong><span>'+tdEsc(title)+'</span></div>';
+    const count = (reportLog || []).length;
+    box.innerHTML = dataHtml + '<details class="disclosure summary-path"><summary>Parcours détaillé · '+count+' étape'+(count>1?'s':'')+'</summary>' + stepsHtml + '</details>';
   }
 
   function buildDiagnosticText(){
     const title = document.getElementById('finalTitle')?.textContent || 'Diagnostic terminé';
     const lines = ['TECHDIAG – RÉSUMÉ DU DIAGNOSTIC','', 'Diagnostic : '+(activeProcedureTitle || ''), 'ID procédure : '+(activeProcedureId || '')];
+    finalContextRows().forEach((item,i) => {
+      if(i===0) lines.push('Statut procédure : '+item.status);
+      else lines.push('Procédure de sortie : '+item.title, 'ID procédure de sortie : '+item.id, 'Statut procédure de sortie : '+item.status);
+    });
 
     const values = tdSummaryDataEntries();
     if(values.length){
@@ -108,22 +124,34 @@ const enhancement = `
 
   async function copyDiagnostic(){
     const text = buildDiagnosticText();
+    const version = summaryVersion;
+    let copied = false;
     try{
       await navigator.clipboard.writeText(text);
+      copied = true;
     }catch(err){
+      if(version !== summaryVersion) return;
       const ta = document.createElement('textarea');
       ta.value = text;
       ta.style.position = 'fixed';
       ta.style.opacity = '0';
       document.body.appendChild(ta);
-      ta.select();
-      document.execCommand('copy');
-      ta.remove();
+      try{
+        ta.select();
+        copied = document.execCommand('copy');
+      }catch(fallbackError){
+        copied = false;
+      }finally{
+        ta.remove();
+      }
     }
+    if(version !== summaryVersion) return;
     const status = document.getElementById('copyStatus');
     if(status){
-      status.classList.remove('hidden');
-      setTimeout(() => status.classList.add('hidden'), 1800);
+      clearTimeout(copyFeedbackTimer);
+      status.textContent = copied ? 'Copié ✓' : 'Copie impossible. Réessayez ou sélectionnez le texte du diagnostic.';
+      status.className = copied ? 'copy-ok' : 'copy-ok error';
+      if(copied) copyFeedbackTimer = setTimeout(() => status.classList.add('hidden'), 1800);
     }
   }
 

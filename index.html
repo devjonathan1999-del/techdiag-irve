@@ -102,6 +102,13 @@ button{font-family:inherit;border:0;border-radius:12px;padding:13px 15px;font-si
 .result.warn{background:rgba(251,191,36,.075);border:1px solid rgba(251,191,36,.28)}
 .result.bad{background:rgba(251,113,133,.075);border:1px solid rgba(251,113,133,.28)}
 #final{max-width:850px;margin-left:auto;margin-right:auto;padding:26px}
+.final-context-row{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:14px;color:var(--muted);font-size:14px;line-height:1.5;overflow-wrap:anywhere}
+.final-context-row>.badge{flex-shrink:0;max-width:46%}
+.final-context-label{display:block;font-size:12px;color:var(--muted2);margin-bottom:3px}
+#finalResult{padding:24px;margin-top:18px}
+#finalTitle{font-size:27px;line-height:1.35;overflow-wrap:anywhere;white-space:pre-line;outline:none}
+#finalBox p{margin-top:14px;white-space:pre-line;overflow-wrap:anywhere;font-size:14px;line-height:1.65}
+#final .btns{margin:20px 0 24px}
 .loading{padding:28px;text-align:center;color:var(--muted)}
 .error{padding:14px;border-radius:14px;background:rgba(251,113,133,.08);border:1px solid rgba(251,113,133,.3);color:#fecdd3;margin-top:14px}
 .hidden{display:none!important}
@@ -111,6 +118,7 @@ button{font-family:inherit;border:0;border-radius:12px;padding:13px 15px;font-si
 @media(max-width:760px){body{padding:11px}.app{max-width:100%}.top{margin-bottom:12px}.grid{grid-template-columns:1fr}.choices,.choices.three{grid-template-columns:1fr}.choices.three .answer:last-child:nth-child(odd){grid-column:auto}.card,.hero,#diag,#final{padding:17px;border-radius:19px}.question{font-size:22px}.tile{min-height:0}.answer{min-height:66px}.sync{display:none}h2{font-size:24px}.codehint{display:none}}
 @media(max-width:430px){body{padding:8px}.top{margin:2px 3px 10px}.logo{width:38px;height:38px;border-radius:12px}.sub{font-size:11px}.card,.hero,#diag,#final{padding:15px;border-radius:17px}.question{font-size:21px}.brandpill{padding:8px 11px}.answer{padding:14px 15px}.btns{gap:7px}.ghost,.primary{width:100%}}
 @media(max-width:760px){.diagnostic-context{flex-direction:column;gap:12px}.diagnostic-context>.badge{max-width:100%}.model-control{width:100%;flex-wrap:wrap}.model-control select{flex:1;max-width:100%}.path-position{margin:20px 0}.brandfilters{flex-wrap:wrap;overflow:visible}.tile{padding:17px 38px 17px 17px}.sync{display:block;white-space:normal;text-align:center;max-width:120px;font-size:11px}.top{align-items:flex-start}.sub{max-width:215px}.hint{font-size:14px}}
+@media(max-width:760px){.final-context-row{flex-direction:column;gap:8px}.final-context-row>.badge{max-width:100%}#finalResult{padding:18px}#finalTitle{font-size:23px}}
 </style>
 </head>
 <body><div class="app">
@@ -134,7 +142,7 @@ button{font-family:inherit;border:0;border-radius:12px;padding:13px 15px;font-si
   <details id="pathHistory" class="disclosure path-history hidden"><summary id="historySummary">Déjà vérifié</summary><ol id="historyEntries"></ol></details>
   <div class="btns"><button class="ghost" onclick="back()">← Retour</button><button class="ghost" onclick="resetApp()">Accueil</button></div>
 </section>
-<section id="final" class="card hidden"><div class="kicker">Conclusion</div><h2 id="finalTitle">Diagnostic terminé</h2><div id="finalBox"></div><div class="btns"><button class="primary" onclick="resetApp()">Nouveau diagnostic</button></div></section>
+<section id="final" class="card hidden" aria-labelledby="finalTitle"><div id="finalContext"></div><div id="finalResult" class="result"><div class="kicker">Conclusion du parcours</div><h2 id="finalTitle" tabindex="-1">Diagnostic terminé</h2><div id="finalBox"></div></div><div class="btns"><button class="ghost" onclick="resetApp()">Nouveau diagnostic</button></div></section>
 </div><script>
 const SPREADSHEET_ID="1R2rQ6nxXzmASrZaggIozln0SXhKsuymBtAdsYN1wcVo",BASE_URL="https://docs.google.com/spreadsheets/d/"+SPREADSHEET_ID+"/gviz/tq?headers=1&sheet=";
 let catalogue=[],steps=[],transitions=[],numericRules=[],references=[],byStep={},byProcedure={},catalogueByProcedure={},transitionsByStep={},ruleByStep={},activeProcedureId="",activeProcedureTitle="",currentStepId="",historyStack=[],reportLog=[],collected={},baseLoadedAt=null,activeBrand="all",activeModel="all";
@@ -210,5 +218,18 @@ function renderText(step){const c=document.getElementById("controls");c.innerHTM
 function renderNumeric(step){const unit=str(step.Unité),rule=ruleByStep[str(step.Step_ID)],c=document.getElementById("controls");c.innerHTML=`<div class="measure"><input id="num" inputmode="decimal" placeholder="Saisir la valeur"><div class="unit">${esc(unit)}</div></div><div class="btns"><button id="numok" class="primary">Valider</button></div><div id="manual" class="hidden"></div>`;document.getElementById("numok").onclick=()=>{const v=Number(document.getElementById("num").value.trim().replace(",","."));if(Number.isNaN(v))return;const shown=v+(unit?" "+unit:"");if(rule){const ok=evaluateRule(v,rule);return recordAndGo(step,shown+" • "+(ok?"conforme":"non conforme"),ok?step.Next_OK:step.Next_NOK,shown)}if(step.Next_NOK){const m=document.getElementById("manual");m.className="manualcheck";m.innerHTML='<strong>Aucune règle numérique structurée n’est validée.</strong><div class="choices"><button id="m1" class="answer">Valeur conforme</button><button id="m2" class="answer">Valeur non conforme</button></div>';document.getElementById("m1").onclick=()=>recordAndGo(step,shown+" • conforme (validation manuelle)",step.Next_OK,shown);document.getElementById("m2").onclick=()=>recordAndGo(step,shown+" • non conforme (validation manuelle)",step.Next_NOK,shown);return}recordAndGo(step,shown,step.Next_OK,shown)}}
 function evaluateRule(v,r){const op=str(r.Operateur).toUpperCase(),min=Number(r.Valeur_min),max=Number(r.Valeur_max);if(op==="LT")return v<max;if(op==="LTE")return v<=max;if(op==="GT")return v>min;if(op==="GTE")return v>=min;if(op==="BETWEEN_INC")return v>=min&&v<=max;if(op==="BETWEEN_EXC")return v>min&&v<max;return true}
 function recordAndGo(step,answer,target,collectedValue=null){historyStack.push({stepId:currentStepId,logLen:reportLog.length,collected:JSON.parse(JSON.stringify(collected))});reportLog.push({stepId:str(step.Step_ID),question:str(step["Instruction / question"]),answer:str(answer)});const key=str(step["Donnée_collectée"]);if(key)collected[key]=collectedValue===null?answer:collectedValue;if(str(target)==="END"&&norm(answer).includes("non conforme")){const a=str(step["Valeur / choix attendu"]);return finishGeneric("Contrôle non conforme",a?"Corriger ce point puis refaire un essai. Valeur / réglage attendu : "+a+".":"Corriger le point contrôlé puis refaire un essai.","bad")}navigate(target,false)}
-function finishFromCurrent(){const step=byStep[currentStepId];if(!step)return finishGeneric("Diagnostic terminé","Fin du parcours.","ok");const type=norm(step["Type_étape"]),title=step["Valeur / choix attendu"]||step["Instruction / question"]||"Diagnostic terminé",text=step["Condition / interprétation"]||step["Instruction / question"]||"Fin du parcours.",style=type.includes("escalade")||type.includes("orientation")?"warn":"ok";finishGeneric(title,text,style)}function finishGeneric(title,text,type="ok"){show("final");document.getElementById("finalTitle").textContent=title;document.getElementById("finalBox").innerHTML=`<div class="result ${type}"><h3>${esc(title)}</h3><p>${esc(text)}</p></div>`}
+function finishFromCurrent(){const step=byStep[currentStepId];if(!step)return finishGeneric("Diagnostic terminé","Fin du parcours.","ok");const type=norm(step["Type_étape"]),title=step["Valeur / choix attendu"]||step["Instruction / question"]||"Diagnostic terminé",text=step["Condition / interprétation"]||step["Instruction / question"]||"Fin du parcours.",style=type.includes("escalade")||type.includes("orientation")?"warn":"ok";finishGeneric(title,text,style)}
+function finalContextRows(){
+  const endId=str(byStep[currentStepId]?.Procedure_ID),ids=[activeProcedureId||endId];
+  if(endId&&endId!==ids[0])ids.push(endId);
+  return ids.map((id,i)=>({id,title:str(catalogueByProcedure[id]?.Titre)||(i===0?activeProcedureTitle:"")||id||"Diagnostic",status:str(catalogueByProcedure[id]?.Statut)||"Sans statut"}));
+}
+function finishGeneric(title,text,type="ok"){
+  show("final");
+  document.getElementById("finalContext").innerHTML=finalContextRows().map((item,i)=>`<div class="final-context-row"><div><span class="final-context-label">${i===0?"Diagnostic démarré":"Procédure de sortie"}</span>${esc(item.title)}</div><span class="badge ${statusClass(item.status)}">Procédure : ${esc(item.status)}</span></div>`).join("");
+  document.getElementById("finalResult").className="result "+type;
+  document.getElementById("finalTitle").textContent=title;
+  document.getElementById("finalBox").innerHTML=str(text)&&str(text)!==str(title)?`<p>${esc(text)}</p>`:"";
+  document.getElementById("finalTitle").focus();
+}
 </script></body></html>
