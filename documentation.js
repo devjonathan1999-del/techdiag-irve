@@ -1,5 +1,5 @@
 (() => {
-  let manufacturerDocs = [], manufacturerDocsPromise = null;
+  let manufacturerDocs = [], manufacturerDocsPromise = null, renderRequest = 0;
 
   const docNorm = value => String(value ?? '')
     .trim()
@@ -14,8 +14,7 @@
         manufacturerDocs = rows.filter(row => {
           const isPublic = docNorm(row?.Statut) === 'public';
           const isManufacturer = docNorm(row?.Type).includes('constructeur');
-          const hasUrl = String(row?.URL || '').trim();
-          return isPublic && isManufacturer && hasUrl;
+          return isPublic && isManufacturer && documentUrl(row?.URL);
         });
         return manufacturerDocs;
       })
@@ -42,23 +41,57 @@
     return !!brand && title.includes(brand);
   }
 
-  function findProcedureDocs(step) {
+  function documentUrl(value) {
+    try {
+      const url = new URL(String(value ?? '').trim());
+      if (!['http:', 'https:'].includes(url.protocol)) return '';
+      // A citation to a PDF page still identifies the same public document.
+      url.hash = '';
+      return url.href;
+    } catch {
+      return '';
+    }
+  }
+
+  function findStepDocs(step) {
     const procedureId = String(step?.Procedure_ID || '').trim();
     const procedure = catalogueByProcedure?.[procedureId];
     if (!procedure) return [];
-    return manufacturerDocs.filter(doc => scopeMatches(doc, procedure));
+
+    const stepId = String(step?.Step_ID || '').trim();
+    const source = String(step?.Source || '');
+    const urlPattern = /https?:\/\/[^\s<>"'|]+/g;
+    const citedUrls = new Set((source.match(urlPattern) || [])
+      .map(url => documentUrl(url.replace(/[),.;\]}]+$/, ''))).filter(Boolean));
+    const citedIds = new Set(source.replace(urlPattern, ' ').match(/[A-Za-z0-9_-]+/g) || []);
+    const seenUrls = new Set();
+
+    return manufacturerDocs.filter(doc => {
+      if (!scopeMatches(doc, procedure)) return false;
+      const assignedSteps = String(doc.Step_IDs || '').trim().split(/[\s,;|]+/).filter(Boolean);
+      // Explicit assignments take precedence. Never fall back to all documents
+      // for the model, or infer relevance from generic words in the question.
+      const relevant = assignedSteps.length
+        ? assignedSteps.includes(stepId)
+        : citedUrls.has(documentUrl(doc.URL)) || citedIds.has(String(doc.Source_ID || '').trim());
+      const url = String(doc.URL || '').trim();
+      if (!relevant || seenUrls.has(url)) return false;
+      seenUrls.add(url);
+      return true;
+    });
   }
 
   async function renderManufacturerDocs(step) {
+    const request = ++renderRequest;
     document.getElementById('manufacturerDocs')?.remove();
 
     const stepId = String(step?.Step_ID || '').trim();
     if (!stepId) return;
 
     await loadManufacturerDocs();
-    if (String(currentStepId || '').trim() !== stepId) return;
+    if (request !== renderRequest || String(currentStepId || '').trim() !== stepId) return;
 
-    const docs = findProcedureDocs(step);
+    const docs = findStepDocs(step);
     if (!docs.length) return;
 
     const card = document.createElement('div');
@@ -74,12 +107,12 @@
     links.style.gap = '8px';
     links.style.flexWrap = 'wrap';
 
-    docs.forEach((doc, index) => {
+    docs.forEach(doc => {
       const docLink = document.createElement('a');
       docLink.href = String(doc.URL || '').trim();
       docLink.target = '_blank';
       docLink.rel = 'noopener noreferrer';
-      docLink.textContent = docs.length === 1 ? '📘 Documentation fabricant' : '📘 ' + (doc.Titre || `Document ${index + 1}`);
+      docLink.textContent = doc.Titre ? '📘 ' + doc.Titre : '📘 Documentation fabricant';
       docLink.title = doc.Titre || 'Documentation fabricant';
       docLink.style.display = 'inline-flex';
       docLink.style.alignItems = 'center';
