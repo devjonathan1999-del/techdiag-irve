@@ -67,13 +67,15 @@
     const seenUrls = new Set();
 
     return manufacturerDocs.filter(doc => {
-      if (!scopeMatches(doc, procedure)) return false;
       const assignedSteps = String(doc.Step_IDs || '').trim().split(/[\s,;|]+/).filter(Boolean);
-      // Explicit assignments take precedence. Never fall back to all documents
-      // for the model, or infer relevance from generic words in the question.
-      const relevant = assignedSteps.length
-        ? assignedSteps.includes(stepId)
-        : citedUrls.has(documentUrl(doc.URL)) || citedIds.has(String(doc.Source_ID || '').trim());
+      const explicitlyAssigned = assignedSteps.includes(stepId);
+      // An exact Step_ID assignment is authoritative, even when a generic
+      // diagnostic temporarily routes into a manufacturer-specific branch.
+      if (assignedSteps.length && !explicitlyAssigned) return false;
+      if (!assignedSteps.length && !scopeMatches(doc, procedure)) return false;
+      const relevant = explicitlyAssigned
+        || citedUrls.has(documentUrl(doc.URL))
+        || citedIds.has(String(doc.Source_ID || '').trim());
       const url = String(doc.URL || '').trim();
       if (!relevant || seenUrls.has(url)) return false;
       seenUrls.add(url);
@@ -127,7 +129,8 @@
     });
 
     card.appendChild(links);
-    document.getElementById('meta')?.insertAdjacentElement('afterend', card);
+    const anchor = document.getElementById('settingsReference') || document.getElementById('meta');
+    anchor?.insertAdjacentElement('afterend', card);
   }
 
   const originalRenderStep = renderStep;
