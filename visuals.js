@@ -80,7 +80,7 @@
     link.style.textDecoration = 'none';
     card.appendChild(link);
 
-    document.getElementById('question')?.insertAdjacentElement('afterend', card);
+    document.getElementById('hint')?.insertAdjacentElement('afterend', card);
   }
 
   const originalRenderStep = renderStep;
