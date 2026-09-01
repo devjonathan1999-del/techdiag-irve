@@ -51,6 +51,7 @@ const baseRows = [
   { Config_ID:'VEST-CFG-003', Configuration:'Pince CT', Alimentation:'Mono', Élément:'DIP 4-5-6', 'Valeur attendue':'OFF/ON/OFF', Condition:'6 kVA', Statut:'À valider' },
   { Config_ID:'VEST-CFG-003', Configuration:'Pince CT', Alimentation:'Mono', Élément:'DIP 4-5-6', 'Valeur attendue':'ON/OFF/OFF', Condition:'9 kVA', Statut:'À valider' },
   { Config_ID:'VEST-CFG-003', Configuration:'Pince CT', Alimentation:'Mono', Élément:'Sens de la pince', 'Valeur attendue':'À contrôler', Condition:'', Statut:'À valider' },
+  { Config_ID:'F2M-CFG-001', Configuration:'DPM', Alimentation:'Mono', Élément:'Adresse', 'Valeur attendue':'001', Condition:'', Statut:'Validé' },
 ];
 
 test('Vestel shared branch displays the settings referenced by Config_ID', async () => {
@@ -81,6 +82,21 @@ test('Vestel parameter module only displays the DIP row matching the selected po
   assert.match(text, /SW3.*1/);
   assert.match(text, /9 kVA.*ON\/OFF\/OFF/);
   assert.doesNotMatch(text, /6 kVA.*OFF\/ON\/OFF/);
+});
+
+test('Vestel settings card links to the uploaded GitHub capture only for Vestel configs', async () => {
+  const vestel = createHarness(baseRows);
+  await vestel.render({ Step_ID:'VP-040', Unité:'VEST-CFG-001' });
+  const vestelLink = vestel.cards()[0].children.find(x => x.tagName === 'a');
+  assert.ok(vestelLink);
+  assert.equal(vestelLink.textContent, '🖼️ Voir le repérage de la borne Vestel');
+  assert.equal(vestelLink.href, 'https://raw.githubusercontent.com/devjonathan1999-del/techdiag-irve/main/Capture/Borne%20VESTEL%20.png');
+  assert.equal(vestelLink.target, '_blank');
+  assert.match(vestelLink.rel, /noopener/);
+
+  const f2m = createHarness(baseRows);
+  await f2m.render({ Step_ID:'F2M-CFG', Unité:'F2M-CFG-001' });
+  assert.equal(f2m.cards()[0].children.some(x => x.tagName === 'a'), false);
 });
 
 test('steps without a supported Config_ID do not display a settings block', async () => {
