@@ -31,6 +31,9 @@ expectExcludes('const STEP_VISUALS', 'hardcoded visual mapping');
 expectExcludes('data:image/png;base64,', 'embedded base64 image');
 expectExcludes("'F107-020':", 'hardcoded F107-020 visual entry');
 
+// Google Sheets reads must bypass stale gviz responses after a base update.
+expectIncludes("'&cacheBust='+Date.now()", 'Google Sheets cache-busting query parameter');
+
 // Public manufacturer documentation must stay data-driven from Sources_Public.
 expectIncludes('querySheet("Sources_Public")', 'Sources_Public documentation source');
 expectIncludes('renderManufacturerDocs', 'manufacturer documentation renderer');
