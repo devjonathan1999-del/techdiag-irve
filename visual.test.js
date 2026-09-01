@@ -34,6 +34,13 @@ expectExcludes("'F107-020':", 'hardcoded F107-020 visual entry');
 // Google Sheets reads must bypass stale gviz responses after a base update.
 expectIncludes("'&cacheBust='+Date.now()", 'Google Sheets cache-busting query parameter');
 
+// Global readability must be present in the built application without changing diagnostic semantics.
+expectIncludes('techdiag-readability', 'global readability enhancement');
+expectIncludes('questionReadabilityClass', 'adaptive question typography');
+expectIncludes('.question.compact', 'compact long-question style');
+expectIncludes('.question.dense', 'dense very-long-question style');
+expectIncludes('.setting-value', 'highlighted settings values');
+
 // Public manufacturer documentation must stay data-driven from Sources_Public.
 expectIncludes('querySheet("Sources_Public")', 'Sources_Public documentation source');
 expectIncludes('renderManufacturerDocs', 'manufacturer documentation renderer');
@@ -95,4 +102,4 @@ const expectedHash = 'ae77c3709771f986b98c2b631de12c73f452d26cd5b6a0452b85bd609a
 if (hash(sourcePng) !== expectedHash) throw new Error('Repository schematic does not match the original manufacturer image');
 if (hash(sourcePng) !== hash(distPng)) throw new Error('Build must copy the hosted schematic without altering it');
 
-console.log('Visual integration test passed for F107 visuals, public manufacturer documentation, and diagnostic summary formatting.');
+console.log('Visual integration test passed for F107 visuals, public manufacturer documentation, global readability, and diagnostic summary formatting.');
