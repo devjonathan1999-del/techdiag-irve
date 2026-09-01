@@ -6,7 +6,7 @@ const { test } = require('node:test');
 
 const source = readFileSync(join(__dirname, 'settings.js'), 'utf8');
 
-function createHarness(rows) {
+function createHarness(rows, initialCollected = {}) {
   class Element {
     constructor(tagName) { this.tagName = tagName; this.children = []; this.style = {}; this.textContent = ''; this.id = ''; }
     appendChild(child) { child.parentNode = this; this.children.push(child); return child; }
@@ -32,6 +32,7 @@ function createHarness(rows) {
       return typeof rows === 'function' ? rows() : rows;
     },
     currentStepId: '',
+    collected: { ...initialCollected },
     renderStep() {},
   });
   vm.runInContext(source, context, { filename: 'settings.js' });
@@ -46,6 +47,7 @@ const baseRows = [
   { Config_ID:'VEST-CFG-001', Configuration:'TIC Linky', Alimentation:'Mono', Élément:'SW3', 'Valeur attendue':'3', Condition:'', Statut:'Brouillon' },
   { Config_ID:'VEST-CFG-001', Configuration:'TIC Linky', Alimentation:'Mono', Élément:'SW2', 'Valeur attendue':'Haut', Condition:'', Statut:'Brouillon' },
   { Config_ID:'VEST-CFG-001', Configuration:'TIC Linky', Alimentation:'Mono', Élément:'DIP 2 à 6', 'Valeur attendue':'OFF', Condition:'DIP 1 indifférent', Statut:'Brouillon' },
+  { Config_ID:'VEST-CFG-003', Configuration:'Pince CT', Alimentation:'Mono', Élément:'SW3', 'Valeur attendue':'1', Condition:'', Statut:'À valider' },
   { Config_ID:'VEST-CFG-003', Configuration:'Pince CT', Alimentation:'Mono', Élément:'DIP 4-5-6', 'Valeur attendue':'OFF/ON/OFF', Condition:'6 kVA', Statut:'À valider' },
   { Config_ID:'VEST-CFG-003', Configuration:'Pince CT', Alimentation:'Mono', Élément:'DIP 4-5-6', 'Valeur attendue':'ON/OFF/OFF', Condition:'9 kVA', Statut:'À valider' },
   { Config_ID:'VEST-CFG-003', Configuration:'Pince CT', Alimentation:'Mono', Élément:'Sens de la pince', 'Valeur attendue':'À contrôler', Condition:'', Statut:'À valider' },
@@ -70,6 +72,15 @@ test('conditional DIP table is displayed while unresolved placeholders are omitt
   assert.match(text, /6 kVA.*OFF\/ON\/OFF/);
   assert.match(text, /9 kVA.*ON\/OFF\/OFF/);
   assert.doesNotMatch(text, /Sens de la pince|À contrôler/);
+});
+
+test('Vestel parameter module only displays the DIP row matching the selected power', async () => {
+  const app = createHarness(baseRows, { puissance_souscrite_vestel_ct:'9 kVA' });
+  await app.render({ Step_ID:'VP-060', Unité:'VEST-CFG-003' });
+  const text = app.cards()[0].children.map(x => x.textContent).join(' ');
+  assert.match(text, /SW3.*1/);
+  assert.match(text, /9 kVA.*ON\/OFF\/OFF/);
+  assert.doesNotMatch(text, /6 kVA.*OFF\/ON\/OFF/);
 });
 
 test('steps without a supported Config_ID do not display a settings block', async () => {
