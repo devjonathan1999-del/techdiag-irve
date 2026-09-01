@@ -28,6 +28,27 @@
     return expected && !['à contrôler', 'a controler', 'à identifier', 'a identifier'].includes(expected);
   }
 
+  function normalizedKva(value) {
+    const match = settingText(value).match(/^(\d+(?:[.,]\d+)?)\s*kva$/i);
+    return match ? `${match[1].replace(',', '.')} kVA` : '';
+  }
+
+  function selectedKva() {
+    if (typeof collected !== 'object' || !collected) return '';
+    const values = Object.values(collected);
+    for (let i = values.length - 1; i >= 0; i -= 1) {
+      const kva = normalizedKva(values[i]);
+      if (kva) return kva;
+    }
+    return '';
+  }
+
+  function matchesSelectedPower(row, kva) {
+    if (!kva) return true;
+    const conditionKva = normalizedKva(row?.Condition);
+    return !conditionKva || conditionKva === kva;
+  }
+
   function settingLabel(row, duplicates) {
     const element = settingText(row?.['Élément']);
     const expected = settingText(row?.['Valeur attendue']);
@@ -48,7 +69,10 @@
     await loadSettings();
     if (request !== renderRequest || settingText(currentStepId) !== stepId) return;
 
-    const rows = settingsRows.filter(row => settingText(row.Config_ID) === configId && isDisplayable(row));
+    const kva = selectedKva();
+    const rows = settingsRows.filter(row =>
+      settingText(row.Config_ID) === configId && isDisplayable(row) && matchesSelectedPower(row, kva)
+    );
     if (!rows.length) return;
 
     const counts = new Map();
