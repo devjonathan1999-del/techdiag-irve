@@ -27,6 +27,10 @@
     return /^VEST-CFG-00[1-4]$/i.test(configId);
   }
 
+  function isF2mDpmConfig(configId) {
+    return /^F2M-CFG-107$/i.test(configId);
+  }
+
   function isDisplayable(row) {
     const expected = settingText(row?.['Valeur attendue']).toLowerCase();
     return expected && !['à contrôler', 'a controler', 'à identifier', 'a identifier'].includes(expected);
@@ -60,6 +64,19 @@
     if (condition && (duplicates > 1 || normalizedKva(condition))) return `${element} — ${condition} : ${expected}`;
     if (condition) return `${element} : ${expected} — ${condition}`;
     return `${element} : ${expected}`;
+  }
+
+  function appendVisualLink(card, text, href) {
+    const visualLink = document.createElement('a');
+    visualLink.className = 'settings-visual-link';
+    visualLink.href = href;
+    visualLink.target = '_blank';
+    visualLink.rel = 'noopener noreferrer';
+    visualLink.textContent = text;
+    visualLink.style.display = 'block';
+    visualLink.style.marginTop = '14px';
+    visualLink.style.fontWeight = '700';
+    card.appendChild(visualLink);
   }
 
   async function renderSettingsReference(step) {
@@ -104,16 +121,24 @@
     });
 
     if (isVestelConfig(configId)) {
-      const visualLink = document.createElement('a');
-      visualLink.className = 'settings-visual-link';
-      visualLink.href = 'https://raw.githubusercontent.com/devjonathan1999-del/techdiag-irve/main/Capture/Borne%20VESTEL%20.png';
-      visualLink.target = '_blank';
-      visualLink.rel = 'noopener noreferrer';
-      visualLink.textContent = '🖼️ Voir le repérage de la borne Vestel';
-      visualLink.style.display = 'block';
-      visualLink.style.marginTop = '14px';
-      visualLink.style.fontWeight = '700';
-      card.appendChild(visualLink);
+      appendVisualLink(
+        card,
+        '🖼️ Voir le repérage de la borne Vestel',
+        'https://raw.githubusercontent.com/devjonathan1999-del/techdiag-irve/main/Capture/Borne%20VESTEL%20.png'
+      );
+    }
+
+    if (isF2mDpmConfig(configId)) {
+      appendVisualLink(
+        card,
+        '🖼️ Configuration Gavazzi monophasé',
+        'https://raw.githubusercontent.com/devjonathan1999-del/techdiag-irve/main/Capture/Config%20gavazzi%20mono.png'
+      );
+      appendVisualLink(
+        card,
+        '🖼️ Configuration Gavazzi triphasé',
+        'https://raw.githubusercontent.com/devjonathan1999-del/techdiag-irve/main/Capture/Config%20gavazzi%20tri.png'
+      );
     }
 
     document.getElementById('meta')?.insertAdjacentElement('afterend', card);
