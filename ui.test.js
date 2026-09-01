@@ -137,10 +137,27 @@ test('construction badge comes from the target step, not the whole procedure', (
   assert.equal(app.run("transitionsByStep['A-010'][0].Libellé"), 'Charge pilotée par Smartcharge');
 });
 
+test('question typography adapts to text length without changing the text', () => {
+  const app = harness();
+
+  app.run("byStep['A-010']['Instruction / question']='Question courte ?'; startProcedure('A')");
+  assert.equal(app.get('question').className, 'question');
+  assert.equal(app.get('question').textContent, 'Question courte ?');
+
+  app.run("byStep['A-010']['Instruction / question']='x'.repeat(120); startProcedure('A')");
+  assert.equal(app.get('question').className, 'question compact');
+  assert.equal(app.get('question').textContent.length, 120);
+
+  app.run("byStep['A-010']['Instruction / question']='x'.repeat(220); startProcedure('A')");
+  assert.equal(app.get('question').className, 'question dense');
+  assert.equal(app.get('question').textContent.length, 220);
+});
+
 test('questions, safety guidance and provenance survive presentation changes verbatim', () => {
   const app = harness();
   const before = app.run('JSON.stringify(fixture)');
   app.run("startProcedure('A')");
+  assert.equal(app.get('question').className, 'question');
   assert.equal(app.get('question').textContent, 'Question exacte ?');
   assert.equal(app.get('hint').textContent, 'Consigne de sécurité à garder visible.');
   assert.match(app.get('meta').innerHTML, /Expertise utilisateur &lt;validée&gt;/);
