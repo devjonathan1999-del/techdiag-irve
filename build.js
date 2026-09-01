@@ -5,6 +5,7 @@ const source = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8');
 const stepVisuals = fs.readFileSync(path.join(__dirname, 'visuals.js'), 'utf8');
 const settingsRenderer = fs.readFileSync(path.join(__dirname, 'settings.js'), 'utf8');
 const manufacturerDocs = fs.readFileSync(path.join(__dirname, 'documentation.js'), 'utf8');
+const readabilityRenderer = fs.readFileSync(path.join(__dirname, 'readability.js'), 'utf8');
 
 const css = `
 <style id="techdiag-summary-style">
@@ -172,6 +173,7 @@ const enhancement = `
 const visualEnhancement = `\n<script id="techdiag-step-visuals">\n${stepVisuals}\n</script>`;
 const settingsEnhancement = `\n<script id="techdiag-settings">\n${settingsRenderer}\n</script>`;
 const documentationEnhancement = `\n<script id="techdiag-manufacturer-docs">\n${manufacturerDocs}\n</script>`;
+const readabilityEnhancement = `\n<script id="techdiag-readability">\n${readabilityRenderer}\n</script>`;
 
 let output = source;
 const sheetsQuerySignature = 'BASE_URL+encodeURIComponent(name)';
@@ -180,7 +182,7 @@ if (!output.includes(sheetsQuerySignature)) {
 }
 output = output.replace(sheetsQuerySignature, sheetsQuerySignature + "+'&cacheBust='+Date.now()");
 output = output.replace('</head>', css + '\n</head>');
-output = output.replace('</body>', visualEnhancement + '\n' + settingsEnhancement + '\n' + documentationEnhancement + '\n' + enhancement + '\n</body>');
+output = output.replace('</body>', visualEnhancement + '\n' + settingsEnhancement + '\n' + documentationEnhancement + '\n' + readabilityEnhancement + '\n' + enhancement + '\n</body>');
 
 const dist = path.join(__dirname, 'dist');
 fs.rmSync(dist, {recursive:true, force:true});
