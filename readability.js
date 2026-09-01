@@ -23,6 +23,9 @@
     style.textContent = `
 .question.compact{font-size:24px;line-height:1.38;max-width:780px}
 .question.dense{font-size:21px;line-height:1.44;max-width:780px}
+.setting-name{color:#cbd8ee}
+.setting-value{color:#f5fbff;font-weight:800;letter-spacing:.01em}
+.setting-condition{color:var(--muted)}
 @media(max-width:760px){
   .question.compact{font-size:20px;line-height:1.42}
   .question.dense{font-size:18px;line-height:1.48}
