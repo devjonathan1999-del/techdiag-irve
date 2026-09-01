@@ -8,7 +8,9 @@ const source = readFileSync(join(__dirname, 'settings.js'), 'utf8');
 
 function createHarness(rows, initialCollected = {}) {
   class Element {
-    constructor(tagName) { this.tagName = tagName; this.children = []; this.style = {}; this.textContent = ''; this.id = ''; }
+    constructor(tagName) { this.tagName = tagName; this.children = []; this.style = {}; this._textContent = ''; this.id = ''; }
+    get textContent() { return this.children.length ? this.children.map(child => child.textContent).join('') : this._textContent; }
+    set textContent(value) { this._textContent = String(value ?? ''); this.children = []; }
     appendChild(child) { child.parentNode = this; this.children.push(child); return child; }
     remove() { if (this.parentNode) this.parentNode.children = this.parentNode.children.filter(x => x !== this); }
     insertAdjacentElement(position, child) {
@@ -118,6 +120,17 @@ test('Free2move DPM settings expose Gavazzi mono and tri captures in disjonctage
       assert.match(link.rel, /noopener/);
     });
   }
+});
+
+test('settings rows visually separate the label from the expected value', async () => {
+  const app = createHarness(baseRows);
+  await app.render({ Step_ID:'F107-010', Unité:'F2M-CFG-107' });
+
+  const rows = app.cards()[0].children.filter(x => x.className === 'setting-row');
+  assert.ok(rows.length >= 3);
+  assert.equal(rows[0].children[0].className, 'setting-name');
+  assert.equal(rows[0].children[1].className, 'setting-value');
+  assert.equal(rows[0].children[1].textContent, '001');
 });
 
 test('steps without a supported Config_ID do not display a settings block', async () => {
