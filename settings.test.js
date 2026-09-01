@@ -8,7 +8,9 @@ const source = readFileSync(join(__dirname, 'settings.js'), 'utf8');
 
 function createHarness(rows, initialCollected = {}) {
   class Element {
-    constructor(tagName) { this.tagName = tagName; this.children = []; this.style = {}; this.textContent = ''; this.id = ''; }
+    constructor(tagName) { this.tagName = tagName; this.children = []; this.style = {}; this._textContent = ''; this.id = ''; }
+    get textContent() { return this.children.length ? this.children.map(child => child.textContent).join('') : this._textContent; }
+    set textContent(value) { this._textContent = String(value ?? ''); this.children = []; }
     appendChild(child) { child.parentNode = this; this.children.push(child); return child; }
     remove() { if (this.parentNode) this.parentNode.children = this.parentNode.children.filter(x => x !== this); }
     insertAdjacentElement(position, child) {
