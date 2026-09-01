@@ -174,6 +174,11 @@ const settingsEnhancement = `\n<script id="techdiag-settings">\n${settingsRender
 const documentationEnhancement = `\n<script id="techdiag-manufacturer-docs">\n${manufacturerDocs}\n</script>`;
 
 let output = source;
+const sheetsQuerySignature = 'BASE_URL+encodeURIComponent(name)';
+if (!output.includes(sheetsQuerySignature)) {
+  throw new Error('TechDiag build: Google Sheets query signature not found');
+}
+output = output.replace(sheetsQuerySignature, sheetsQuerySignature + "+'&cacheBust='+Date.now()");
 output = output.replace('</head>', css + '\n</head>');
 output = output.replace('</body>', visualEnhancement + '\n' + settingsEnhancement + '\n' + documentationEnhancement + '\n' + enhancement + '\n</body>');
 
