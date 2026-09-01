@@ -27,6 +27,8 @@ expectIncludes("visual['Légende']", 'visual link label read from data');
 expectIncludes("link.target = '_blank'", 'new-tab link behavior');
 expectIncludes("link.rel = 'noopener noreferrer'", 'safe link behavior');
 expectIncludes('renderStepVisual', 'step-specific visual renderer');
+expectIncludes("document.getElementById('hint')?.insertAdjacentElement('afterend', card)", 'visual inserted after the descriptive hint');
+expectExcludes("document.getElementById('question')?.insertAdjacentElement('afterend', card)", 'visual inserted directly after the question');
 expectExcludes('const STEP_VISUALS', 'hardcoded visual mapping');
 expectExcludes('data:image/png;base64,', 'embedded base64 image');
 expectExcludes("'F107-020':", 'hardcoded F107-020 visual entry');
