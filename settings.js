@@ -57,13 +57,16 @@
     return !conditionKva || conditionKva === kva;
   }
 
-  function settingLabel(row, duplicates) {
+  function settingParts(row, duplicates) {
     const element = settingText(row?.['Élément']);
     const expected = settingText(row?.['Valeur attendue']);
     const condition = settingText(row?.Condition);
-    if (condition && (duplicates > 1 || normalizedKva(condition))) return `${element} — ${condition} : ${expected}`;
-    if (condition) return `${element} : ${expected} — ${condition}`;
-    return `${element} : ${expected}`;
+    const conditionInLabel = condition && (duplicates > 1 || normalizedKva(condition));
+    return {
+      label: conditionInLabel ? `${element} — ${condition}` : element,
+      value: expected,
+      suffix: condition && !conditionInLabel ? ` — ${condition}` : '',
+    };
   }
 
   function appendVisualLink(card, text, href) {
@@ -116,7 +119,25 @@
       item.className = 'setting-row';
       item.style.marginTop = '6px';
       const key = settingText(row['Élément']);
-      item.textContent = settingLabel(row, counts.get(key) || 1);
+      const parts = settingParts(row, counts.get(key) || 1);
+
+      const name = document.createElement('span');
+      name.className = 'setting-name';
+      name.textContent = `${parts.label} : `;
+      item.appendChild(name);
+
+      const value = document.createElement('span');
+      value.className = 'setting-value';
+      value.textContent = parts.value;
+      item.appendChild(value);
+
+      if (parts.suffix) {
+        const condition = document.createElement('span');
+        condition.className = 'setting-condition';
+        condition.textContent = parts.suffix;
+        item.appendChild(condition);
+      }
+
       card.appendChild(item);
     });
 
