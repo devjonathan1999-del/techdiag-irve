@@ -23,6 +23,10 @@
     return /^[A-Z0-9]+-CFG-[A-Z0-9-]+$/i.test(value) ? value : '';
   }
 
+  function isVestelConfig(configId) {
+    return /^VEST-CFG-00[1-4]$/i.test(configId);
+  }
+
   function isDisplayable(row) {
     const expected = settingText(row?.['Valeur attendue']).toLowerCase();
     return expected && !['à contrôler', 'a controler', 'à identifier', 'a identifier'].includes(expected);
@@ -98,6 +102,19 @@
       item.textContent = settingLabel(row, counts.get(key) || 1);
       card.appendChild(item);
     });
+
+    if (isVestelConfig(configId)) {
+      const visualLink = document.createElement('a');
+      visualLink.className = 'settings-visual-link';
+      visualLink.href = 'assets/vestel/borne-vestel.png';
+      visualLink.target = '_blank';
+      visualLink.rel = 'noopener noreferrer';
+      visualLink.textContent = '🖼️ Voir le repérage de la borne Vestel';
+      visualLink.style.display = 'block';
+      visualLink.style.marginTop = '14px';
+      visualLink.style.fontWeight = '700';
+      card.appendChild(visualLink);
+    }
 
     document.getElementById('meta')?.insertAdjacentElement('afterend', card);
   }
