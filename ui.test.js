@@ -6,6 +6,7 @@ const { test } = require('node:test');
 
 const html = readFileSync(join(__dirname, 'index.html'), 'utf8');
 const script = [...html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/g)].map(m => m[1]).join('\n');
+const readability = readFileSync(join(__dirname, 'readability.js'), 'utf8');
 
 // DOM boundary only. The catalogue, routing, records and renderers below are
 // the actual inline application code; Google network loading is not needed.
@@ -32,9 +33,10 @@ function harness() {
     }
   }
   const get = id => { if (!elements.has(id)) elements.set(id, new Element(id)); return elements.get(id); };
-  const context = vm.createContext({ console, document: { getElementById: get },
+  const context = vm.createContext({ console, window: {}, document: { getElementById: get },
     google: { charts: { load() {}, setOnLoadCallback() {} } }, alert: message => { throw Error(message); } });
   vm.runInContext(script, context);
+  vm.runInContext(readability, context, { filename: 'readability.js' });
   const run = code => vm.runInContext(code, context);
   context.fixture = {
     catalogue: [
