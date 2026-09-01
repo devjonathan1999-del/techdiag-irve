@@ -53,7 +53,7 @@
     const element = settingText(row?.['Élément']);
     const expected = settingText(row?.['Valeur attendue']);
     const condition = settingText(row?.Condition);
-    if (condition && duplicates > 1) return `${element} — ${condition} : ${expected}`;
+    if (condition && (duplicates > 1 || normalizedKva(condition))) return `${element} — ${condition} : ${expected}`;
     if (condition) return `${element} : ${expected} — ${condition}`;
     return `${element} : ${expected}`;
   }
