@@ -120,6 +120,17 @@ test('Free2move DPM settings expose Gavazzi mono and tri captures in disjonctage
   }
 });
 
+test('settings rows visually separate the label from the expected value', async () => {
+  const app = createHarness(baseRows);
+  await app.render({ Step_ID:'F107-010', Unité:'F2M-CFG-107' });
+
+  const rows = app.cards()[0].children.filter(x => x.className === 'setting-row');
+  assert.ok(rows.length >= 3);
+  assert.equal(rows[0].children[0].className, 'setting-name');
+  assert.equal(rows[0].children[1].className, 'setting-value');
+  assert.equal(rows[0].children[1].textContent, '001');
+});
+
 test('steps without a supported Config_ID do not display a settings block', async () => {
   const app = createHarness(baseRows);
   await app.render({ Step_ID:'DISJ-313', Unité:'' });
