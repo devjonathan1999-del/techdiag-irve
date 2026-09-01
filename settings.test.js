@@ -52,6 +52,9 @@ const baseRows = [
   { Config_ID:'VEST-CFG-003', Configuration:'Pince CT', Alimentation:'Mono', Élément:'DIP 4-5-6', 'Valeur attendue':'ON/OFF/OFF', Condition:'9 kVA', Statut:'À valider' },
   { Config_ID:'VEST-CFG-003', Configuration:'Pince CT', Alimentation:'Mono', Élément:'Sens de la pince', 'Valeur attendue':'À contrôler', Condition:'', Statut:'À valider' },
   { Config_ID:'F2M-CFG-001', Configuration:'DPM', Alimentation:'Mono', Élément:'Adresse', 'Valeur attendue':'001', Condition:'', Statut:'Validé' },
+  { Config_ID:'F2M-CFG-107', Configuration:'DPM – Modbus RS485', Alimentation:'Mono et Tri', Élément:'Adresse', 'Valeur attendue':'001', Condition:'Erreur 107 eProWallbox Move / Full', Statut:'Validé TechDiag' },
+  { Config_ID:'F2M-CFG-107', Configuration:'DPM – Modbus RS485', Alimentation:'Mono et Tri', Élément:'Parité', 'Valeur attendue':'EVEN', Condition:'Erreur 107 eProWallbox Move / Full', Statut:'Validé TechDiag' },
+  { Config_ID:'F2M-CFG-107', Configuration:'DPM – Modbus RS485', Alimentation:'Mono et Tri', Élément:'Débit baud', 'Valeur attendue':'38.4', Condition:'Erreur 107 eProWallbox Move / Full', Statut:'Validé TechDiag' },
 ];
 
 test('Vestel shared branch displays the settings referenced by Config_ID', async () => {
@@ -97,6 +100,24 @@ test('Vestel settings card links to the uploaded GitHub capture only for Vestel 
   const f2m = createHarness(baseRows);
   await f2m.render({ Step_ID:'F2M-CFG', Unité:'F2M-CFG-001' });
   assert.equal(f2m.cards()[0].children.some(x => x.tagName === 'a'), false);
+});
+
+test('Free2move DPM settings expose Gavazzi mono and tri captures in disjonctage and error 107', async () => {
+  const expected = [
+    ['🖼️ Configuration Gavazzi monophasé', 'https://raw.githubusercontent.com/devjonathan1999-del/techdiag-irve/main/Capture/Config%20gavazzi%20mono.png'],
+    ['🖼️ Configuration Gavazzi triphasé', 'https://raw.githubusercontent.com/devjonathan1999-del/techdiag-irve/main/Capture/Config%20gavazzi%20tri.png'],
+  ];
+
+  for (const stepId of ['DISJ-360', 'F107-010']) {
+    const app = createHarness(baseRows);
+    await app.render({ Step_ID:stepId, Unité:'F2M-CFG-107' });
+    const links = app.cards()[0].children.filter(x => x.tagName === 'a');
+    assert.deepEqual(links.map(link => [link.textContent, link.href]), expected, stepId);
+    links.forEach(link => {
+      assert.equal(link.target, '_blank');
+      assert.match(link.rel, /noopener/);
+    });
+  }
 });
 
 test('steps without a supported Config_ID do not display a settings block', async () => {
