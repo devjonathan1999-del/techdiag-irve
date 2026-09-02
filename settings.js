@@ -94,7 +94,7 @@
 
     const guidance = document.createElement('div');
     guidance.className = 'settings-subsection-text';
-    guidance.textContent = 'DPM ↔ CN12 : GND ↔ GND • + ↔ + • − ↔ − • câble adapté au Modbus RS485 • continuité correcte • terminaison RS485 lorsqu’elle est requise.';
+    guidance.textContent = 'DPM ↔ CN12 : GND ↔ GND • + ↔ + • − ↔ − • câble adapté au Modbus RS485 • continuité correcte.';
     guidance.style.marginTop = '6px';
     guidance.style.lineHeight = '1.5';
     card.appendChild(guidance);
