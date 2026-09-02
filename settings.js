@@ -82,6 +82,30 @@
     card.appendChild(visualLink);
   }
 
+  function appendF2mParameterWiring(card, stepId) {
+    if (stepId !== 'F2MP-010') return;
+
+    const title = document.createElement('strong');
+    title.className = 'settings-subsection-title';
+    title.textContent = '🔌 Câblage DPM / Modbus RS485';
+    title.style.display = 'block';
+    title.style.marginTop = '18px';
+    card.appendChild(title);
+
+    const guidance = document.createElement('div');
+    guidance.className = 'settings-subsection-text';
+    guidance.textContent = 'DPM ↔ CN12 : GND ↔ GND • + ↔ + • − ↔ − • câble adapté au Modbus RS485 • continuité correcte • terminaison RS485 lorsqu’elle est requise.';
+    guidance.style.marginTop = '6px';
+    guidance.style.lineHeight = '1.5';
+    card.appendChild(guidance);
+
+    appendVisualLink(
+      card,
+      '🔌 Voir le schéma de câblage DPM / CN12',
+      'assets/f2m/107/cablage-cn12.png'
+    );
+  }
+
   async function renderSettingsReference(step) {
     const request = ++renderRequest;
     document.getElementById('settingsReference')?.remove();
@@ -150,6 +174,7 @@
     }
 
     if (isF2mDpmConfig(configId)) {
+      appendF2mParameterWiring(card, stepId);
       appendVisualLink(
         card,
         '🖼️ Configuration Gavazzi monophasé',
