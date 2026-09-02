@@ -79,7 +79,7 @@ function createHarness() {
   };
 }
 
-test('F2M parameter module shows the CN12 wiring reference before Gavazzi captures', async () => {
+test('F2M parameter module shows the CN12 wiring reference before Gavazzi captures without termination guidance', async () => {
   const app = createHarness();
   await app.render({ Step_ID:'F2MP-010', Unité:'F2M-CFG-107' });
 
@@ -88,7 +88,7 @@ test('F2M parameter module shows the CN12 wiring reference before Gavazzi captur
   assert.match(card.textContent, /Câblage DPM \/ Modbus RS485/);
   assert.match(card.textContent, /GND.*GND/);
   assert.match(card.textContent, /continuité/);
-  assert.match(card.textContent, /terminaison RS485/);
+  assert.doesNotMatch(card.textContent, /terminaison|120\s*Ω|résistance/i);
 
   const links = card.children.filter(node => node.tagName === 'a');
   assert.deepEqual(links.map(link => link.textContent), [
