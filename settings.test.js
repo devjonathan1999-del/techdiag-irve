@@ -57,6 +57,8 @@ const baseRows = [
   { Config_ID:'F2M-CFG-107', Configuration:'DPM – Modbus RS485', Alimentation:'Mono et Tri', Élément:'Adresse', 'Valeur attendue':'001', Condition:'Erreur 107 eProWallbox Move / Full', Statut:'Validé TechDiag' },
   { Config_ID:'F2M-CFG-107', Configuration:'DPM – Modbus RS485', Alimentation:'Mono et Tri', Élément:'Parité', 'Valeur attendue':'EVEN', Condition:'Erreur 107 eProWallbox Move / Full', Statut:'Validé TechDiag' },
   { Config_ID:'F2M-CFG-107', Configuration:'DPM – Modbus RS485', Alimentation:'Mono et Tri', Élément:'Débit baud', 'Valeur attendue':'38.4', Condition:'Erreur 107 eProWallbox Move / Full', Statut:'Validé TechDiag' },
+  { Config_ID:'SCH-CFG-PEAK-001', Configuration:'Peak Controller Schneider', Alimentation:'Mono', Élément:'Réglage courant max', 'Valeur attendue':'40 A', Condition:'18 kVA', Statut:'Validé TechDiag' },
+  { Config_ID:'SCH-CFG-PEAK-001', Configuration:'Peak Controller Schneider', Alimentation:'Tri', Élément:'Réglage courant max', 'Valeur attendue':'25 A', Condition:'18 kVA', Statut:'Validé TechDiag' },
 ];
 
 test('Vestel shared branch displays the settings referenced by Config_ID', async () => {
@@ -87,6 +89,17 @@ test('Vestel parameter module only displays the DIP row matching the selected po
   assert.match(text, /SW3.*1/);
   assert.match(text, /9 kVA.*ON\/OFF\/OFF/);
   assert.doesNotMatch(text, /6 kVA.*OFF\/ON\/OFF/);
+});
+
+test('Peak Controller settings only display the selected supply type at the selected power', async () => {
+  const app = createHarness(baseRows, {
+    type_alimentation_peak_controller:'Triphasée',
+    puissance_souscrite_peak_controller:'18 kVA',
+  });
+  await app.render({ Step_ID:'DISJ-394', Unité:'SCH-CFG-PEAK-001' });
+  const text = app.cards()[0].children.map(x => x.textContent).join(' ');
+  assert.match(text, /25 A/);
+  assert.doesNotMatch(text, /40 A/);
 });
 
 test('Vestel settings card links to the uploaded GitHub capture only for Vestel configs', async () => {
