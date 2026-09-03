@@ -51,10 +51,35 @@
     return '';
   }
 
+  function normalizedSupply(value) {
+    const text = settingText(value).toLowerCase();
+    if (/triphas/.test(text) || text === 'tri') return 'tri';
+    if (/monophas/.test(text) || text === 'mono') return 'mono';
+    return '';
+  }
+
+  function selectedSupply() {
+    if (typeof collected !== 'object' || !collected) return '';
+    const values = Object.values(collected);
+    for (let i = values.length - 1; i >= 0; i -= 1) {
+      const supply = normalizedSupply(values[i]);
+      if (supply) return supply;
+    }
+    return '';
+  }
+
   function matchesSelectedPower(row, kva) {
     if (!kva) return true;
     const conditionKva = normalizedKva(row?.Condition);
     return !conditionKva || conditionKva === kva;
+  }
+
+  function matchesSelectedSupply(row, supply) {
+    if (!supply) return true;
+    const rowSupply = settingText(row?.Alimentation).toLowerCase();
+    if (!rowSupply || (/mono/.test(rowSupply) && /tri/.test(rowSupply))) return true;
+    const normalized = normalizedSupply(rowSupply);
+    return !normalized || normalized === supply;
   }
 
   function settingParts(row, duplicates) {
@@ -118,8 +143,12 @@
     if (request !== renderRequest || settingText(currentStepId) !== stepId) return;
 
     const kva = selectedKva();
+    const supply = selectedSupply();
     const rows = settingsRows.filter(row =>
-      settingText(row.Config_ID) === configId && isDisplayable(row) && matchesSelectedPower(row, kva)
+      settingText(row.Config_ID) === configId &&
+      isDisplayable(row) &&
+      matchesSelectedPower(row, kva) &&
+      matchesSelectedSupply(row, supply)
     );
     if (!rows.length) return;
 
