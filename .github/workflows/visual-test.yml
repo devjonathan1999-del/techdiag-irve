@@ -24,7 +24,7 @@ jobs:
           node-version: 20
 
       - name: Test TechDiag
-        run: node --test ui.test.js user-view.test.js visual.test.js visual-condition.test.js peak-setting-alert.test.js peak-alert-order.test.js peak-settings-filter.test.js settings.test.js f2m-param-wiring.test.js parameter-layout.test.js documentation-shared.test.js agcp-reference.test.js navigation-scroll.test.js contextual-transition.test.js
+        run: node --test ui.test.js user-view.test.js visual.test.js visual-condition.test.js peak-setting-alert.test.js peak-alert-order.test.js peak-settings-filter.test.js settings.test.js f2m-param-wiring.test.js parameter-layout.test.js documentation-order.test.js documentation-shared.test.js agcp-reference.test.js navigation-scroll.test.js contextual-transition.test.js
 
       - name: Build TechDiag
         run: node build.js
