@@ -101,7 +101,7 @@
   }
 
   function appendPeakSettingAlert(rows, stepId, configId, kva, supply) {
-    if (stepId !== 'SCHP-130' || configId !== 'SCH-CFG-PEAK-001' || !kva || !supply) return;
+    if (!['SCHP-130', 'SCHP-M130'].includes(stepId) || configId !== 'SCH-CFG-PEAK-001' || !kva || !supply) return;
 
     const current = valueForElement(rows, 'Réglage courant max');
     const compatibility = valueForElement(rows, 'Compatibilité installation');

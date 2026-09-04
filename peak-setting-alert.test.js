@@ -6,7 +6,7 @@ const { test } = require('node:test');
 
 const source = readFileSync(join(__dirname, 'settings.js'), 'utf8');
 
-function createHarness(initialCollected, rows) {
+function createHarness(initialCollected, rows, stepId = 'SCHP-130') {
   class Element {
     constructor(tagName) {
       this.tagName = tagName;
@@ -55,7 +55,7 @@ function createHarness(initialCollected, rows) {
       assert.equal(name, 'Reglages');
       return rows;
     },
-    currentStepId: 'SCHP-130',
+    currentStepId: stepId,
     collected: { ...initialCollected },
     renderStep() {},
   });
@@ -64,10 +64,13 @@ function createHarness(initialCollected, rows) {
 
   return {
     async render() {
-      await context.window.renderSettingsReference({ Step_ID:'SCHP-130', Unité:'SCH-CFG-PEAK-001' });
+      await context.window.renderSettingsReference({ Step_ID:stepId, Unité:'SCH-CFG-PEAK-001' });
     },
     alert() {
       return descendants(root).find(node => node.id === 'peakSettingAlert') || null;
+    },
+    card() {
+      return descendants(root).find(node => node.id === 'settingsReference') || null;
     },
   };
 }
@@ -88,6 +91,22 @@ test('SCHP-130 highlights the exact Peak Controller setting selected for 18 kVA 
   assert.ok(app.alert());
   assert.match(app.alert().textContent, /RÉGLAGE PEAK CONTROLLER\s*:\s*25 A/i);
   assert.match(app.alert().textContent, /18 kVA triphasé\s*[—-]\s*30 A par phase/i);
+});
+
+test('SCHP-M130 highlights the monophasé setting and never shows EVA2HPC3', async () => {
+  const rows = [
+    { Config_ID:'SCH-CFG-PEAK-001', Configuration:'Peak Controller Schneider', Alimentation:'Mono', Élément:'Modèle', 'Valeur attendue':'EVA2HPC1', Condition:'Schneider Charge' },
+    { Config_ID:'SCH-CFG-PEAK-001', Configuration:'Peak Controller Schneider', Alimentation:'Mono', Élément:'Calibres disponibles', 'Valeur attendue':'32 / 40 / 50 A', Condition:'EVA2HPC1' },
+    { Config_ID:'SCH-CFG-PEAK-001', Alimentation:'Mono', Élément:'Réglage courant max', 'Valeur attendue':'40 A', Condition:'9 kVA' },
+    { Config_ID:'SCH-CFG-PEAK-001', Configuration:'Peak Controller Schneider', Alimentation:'Tri', Élément:'Modèle', 'Valeur attendue':'EVA2HPC3', Condition:'Schneider Charge' },
+  ];
+  const app = createHarness({ type_alimentation_peak_param:'Monophasée', puissance_peak_param:'9 kVA' }, rows, 'SCHP-M130');
+  await app.render();
+  assert.ok(app.alert());
+  assert.match(app.alert().textContent, /RÉGLAGE PEAK CONTROLLER\s*:\s*40 A/i);
+  assert.ok(app.card());
+  assert.match(app.card().textContent, /EVA2HPC1/);
+  assert.doesNotMatch(app.card().textContent, /EVA2HPC3/);
 });
 
 test('12 kVA triphasé shows 16 A plus the insufficient-power recommendation', async () => {

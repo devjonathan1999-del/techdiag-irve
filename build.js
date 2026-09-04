@@ -7,6 +7,7 @@ const settingsRenderer = fs.readFileSync(path.join(__dirname, 'settings.js'), 'u
 const manufacturerDocs = fs.readFileSync(path.join(__dirname, 'documentation.js'), 'utf8');
 const readabilityRenderer = fs.readFileSync(path.join(__dirname, 'readability.js'), 'utf8');
 const parameterLayout = fs.readFileSync(path.join(__dirname, 'parameter-layout.js'), 'utf8');
+const peakContextRenderer = fs.readFileSync(path.join(__dirname, 'peak-context.js'), 'utf8');
 
 const css = `
 <style id="techdiag-summary-style">
@@ -173,6 +174,7 @@ const enhancement = `
 
 const visualEnhancement = `\n<script id="techdiag-step-visuals">\n${stepVisuals}\n</script>`;
 const settingsEnhancement = `\n<script id="techdiag-settings">\n${settingsRenderer}\n</script>`;
+const peakContextEnhancement = `\n<script id="techdiag-peak-context">\n${peakContextRenderer}\n</script>`;
 const documentationEnhancement = `\n<script id="techdiag-manufacturer-docs">\n${manufacturerDocs}\n</script>`;
 const readabilityEnhancement = `\n<script id="techdiag-readability">\n${readabilityRenderer}\n</script>`;
 const parameterLayoutEnhancement = `\n<script id="techdiag-parameter-layout">\n${parameterLayout}\n</script>`;
@@ -184,7 +186,7 @@ if (!output.includes(sheetsQuerySignature)) {
 }
 output = output.replace(sheetsQuerySignature, sheetsQuerySignature + "+'&cacheBust='+Date.now()");
 output = output.replace('</head>', css + '\n</head>');
-output = output.replace('</body>', visualEnhancement + '\n' + settingsEnhancement + '\n' + documentationEnhancement + '\n' + readabilityEnhancement + '\n' + parameterLayoutEnhancement + '\n' + enhancement + '\n</body>');
+output = output.replace('</body>', visualEnhancement + '\n' + settingsEnhancement + '\n' + peakContextEnhancement + '\n' + documentationEnhancement + '\n' + readabilityEnhancement + '\n' + parameterLayoutEnhancement + '\n' + enhancement + '\n</body>');
 
 const dist = path.join(__dirname, 'dist');
 fs.rmSync(dist, {recursive:true, force:true});
