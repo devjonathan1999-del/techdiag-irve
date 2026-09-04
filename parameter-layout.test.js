@@ -68,9 +68,10 @@ function harness({ controlLabels = [] } = {}) {
   const nav = new Element('', 'btns');
   [hint, reference, controls, status, meta, docs, history, nav].forEach(child => diag.appendChild(child));
   [diag, hint, reference, controls, status, meta, docs, history].forEach(element => elements.set(element.id, element));
+  const descendants = node => [node, ...node.children.flatMap(descendants)];
 
   const document = {
-    getElementById: id => elements.get(id) || null,
+    getElementById: id => descendants(diag).find(node => node.id === id) || null,
     createElement: tagName => {
       const element = new Element();
       element.tagName = tagName;
