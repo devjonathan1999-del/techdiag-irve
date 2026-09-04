@@ -11,7 +11,7 @@
       .catch(error => {
         console.warn('TechDiag: impossible de charger les visuels terrain.', error);
         visuals = [];
-        return visuals;
+        return visualsPromise;
       });
     return visualsPromise;
   }
@@ -144,7 +144,8 @@
     if (isInlineImage(visual)) appendInlineImage(card, visual);
     else appendVisualLink(card, visual);
 
-    document.getElementById('hint')?.insertAdjacentElement('afterend', card);
+    const anchor = document.getElementById('peakSettingAlert') || document.getElementById('hint');
+    anchor?.insertAdjacentElement('afterend', card);
   }
 
   const originalRenderStep = renderStep;
