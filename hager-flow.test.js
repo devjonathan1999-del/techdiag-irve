@@ -75,11 +75,13 @@ function mkStep(proc, id, order, response, key, next = '', question = id) {
 }
 
 const powerCatalogue = [{ Procedure_ID:'POWER', Famille:'Diagnostic', Marque:'IRVE', Titre:'Puissance souscrite', Statut:'À valider' }];
+const powerOtherStep = mkStep('POWER','DISJ-109',109,'Numérique / observation','puissance_souscrite','DISJ-110');
+powerOtherStep.Unité = 'kVA';
 const powerSteps = [
   mkStep('POWER','DISJ-090',90,'Choix','type_alimentation'),
   mkStep('POWER','DISJ-100',100,'Choix','puissance_souscrite'),
   mkStep('POWER','DISJ-105',105,'Choix','puissance_souscrite'),
-  mkStep('POWER','DISJ-109',109,'Numérique / observation','puissance_souscrite','DISJ-110'),
+  powerOtherStep,
   mkStep('POWER','DISJ-110',110,'Confirmation','fin','END'),
 ];
 const powerTransitions = {
@@ -115,10 +117,10 @@ test('DISJ-105 renders only tri powers and Autre replaces the temporary value', 
   assert.deepEqual(app.get('controls').buttons.map(b=>b.textContent.trim()),['6 kVA','9 kVA','12 kVA','15 kVA','18 kVA','24 kVA','30 kVA','36 kVA','Autre']);
   click(app,'Autre');
   assert.equal(app.run('currentStepId'),'DISJ-109');
-  app.get('txt').value='20'; app.get('txtok').onclick();
+  app.get('num').value='20'; app.get('numok').onclick();
   assert.equal(app.run('currentStepId'),'DISJ-110');
   assert.equal(collected(app,'type_alimentation'),'Triphasée');
-  assert.equal(collected(app,'puissance_souscrite'),'20');
+  assert.equal(collected(app,'puissance_souscrite'),'20 kVA');
 });
 
 const hagerCatalogue = [{ Procedure_ID:'HAGER', Famille:'Diagnostic', Marque:'Hager', Titre:'XEV replay', Statut:'À valider' }];
