@@ -24,7 +24,7 @@ expectIncludes('querySheet("Visuels_Terrain")', 'Visuels_Terrain data source');
 expectIncludes('visuals=', 'visual catalogue loaded from Google Sheets');
 expectIncludes('visual.URL', 'visual URL read from data');
 expectIncludes("visual['Légende']", 'visual link label read from data');
-expectIncludes("visual.Affichage", 'data-driven visual display mode');
+expectIncludes("visual?.Affichage", 'data-driven visual display mode');
 expectIncludes("document.createElement('img')", 'inline image renderer');
 expectIncludes("image.src = visual.URL", 'inline image source comes from Visuels_Terrain');
 expectIncludes("image.alt = visual['Légende']", 'inline image alternative text comes from data');
