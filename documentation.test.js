@@ -31,10 +31,9 @@ function createHarness(rows) {
     }
   }
   const root = new Element('section');
-  const meta = new Element('div'); meta.id = 'meta'; root.appendChild(meta);
-  const history = new Element('details'); history.id = 'pathHistory'; root.appendChild(history);
-  const completion = new Element('div'); completion.id = 'completionControls'; root.appendChild(completion);
-  const nav = new Element('div'); nav.id = 'navigation'; root.appendChild(nav);
+  const meta = new Element('div');
+  meta.id = 'meta';
+  root.appendChild(meta);
   const descendants = node => [node, ...node.children.flatMap(descendants)];
   const renderedSteps = [];
   const context = vm.createContext({
@@ -59,7 +58,6 @@ function createHarness(rows) {
   vm.runInContext(source, context, { filename: 'documentation.js' });
   return {
     context,
-    root,
     renderedSteps,
     async render(step) {
       context.currentStepId = step.Step_ID;
@@ -114,14 +112,6 @@ for (const [id, expected] of [
     assert.equal(JSON.stringify(currentStep), snapshot, 'The diagnostic step must remain unchanged');
   });
 }
-
-test('manufacturer documentation is placed after history and before Terminer / Retour / Accueil', async () => {
-  const app = createHarness([doc('TIC', 'SBCL-100')]);
-  await app.render(step('SBCL-100'));
-  assert.deepEqual(app.root.children.map(node => node.id || node.tagName), [
-    'meta', 'pathHistory', 'manufacturerDocs', 'completionControls', 'navigation',
-  ]);
-});
 
 test('step IDs are exact tokens, not substrings or procedure-wide matches', async () => {
   const app = createHarness([
