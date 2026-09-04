@@ -33,8 +33,10 @@ class Element {
   insertAdjacentElement(position, child) {
     assert.equal(position, 'afterend');
     const parent = this.parentNode;
+    if (child.parentNode) child.parentNode.children = child.parentNode.children.filter(item => item !== child);
     const index = parent.children.indexOf(this);
-    parent.insertBefore(child, parent.children[index + 1] || null);
+    child.parentNode = parent;
+    parent.children.splice(index + 1, 0, child);
   }
   querySelectorAll(selector) {
     const descendants = node => node.children.flatMap(child => [child, ...descendants(child)]);
