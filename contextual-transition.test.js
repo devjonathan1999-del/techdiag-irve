@@ -6,6 +6,7 @@ const { test } = require('node:test');
 
 const html = readFileSync(join(__dirname, 'index.html'), 'utf8');
 const script = [...html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/g)].map(m => m[1]).join('\n');
+const parameterLayout = readFileSync(join(__dirname, 'parameter-layout.js'), 'utf8');
 
 function harness(originProcedureId) {
   const elements = new Map();
@@ -42,6 +43,7 @@ function harness(originProcedureId) {
     alert: message => { throw new Error(message); },
   });
   vm.runInContext(script, context);
+  vm.runInContext(parameterLayout, context, { filename: 'parameter-layout.js' });
 
   context.fixture = {
     step: { Step_ID:'SCHP-260', Procedure_ID:'SCH-PEAK-PARAM-001' },
