@@ -6,6 +6,7 @@ const { test } = require('node:test');
 
 const html = readFileSync(join(__dirname, 'index.html'), 'utf8');
 const script = [...html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/g)].map(m => m[1]).join('\n');
+const readability = readFileSync(join(__dirname, 'readability.js'), 'utf8');
 
 function harness() {
   const elements = new Map();
@@ -36,6 +37,7 @@ function harness() {
     alert: message => { throw new Error(message); },
   });
   vm.runInContext(script, context);
+  vm.runInContext(readability, context, { filename: 'readability.js' });
   return { get, run: code => vm.runInContext(code, context) };
 }
 
