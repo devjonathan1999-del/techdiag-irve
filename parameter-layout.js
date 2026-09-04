@@ -25,6 +25,18 @@
     return text(button?.textContent).toLowerCase() === 'terminer';
   }
 
+  function isParameterModule(step) {
+    return /-PARAM-/.test(text(step?.Procedure_ID).toUpperCase());
+  }
+
+  function applyPathHistoryVisibility(step) {
+    if (!isParameterModule(step)) return;
+    const history = document.getElementById('pathHistory');
+    if (!history) return;
+    history.classList.add('hidden');
+    history.open = false;
+  }
+
   function moveFinishControlsToBottom(diag, controls) {
     document.getElementById('completionControls')?.remove();
 
@@ -49,6 +61,8 @@
   }
 
   function positionParameterControls(step) {
+    applyPathHistoryVisibility(step);
+
     const diag = document.getElementById('diag');
     const controls = document.getElementById('controls');
     if (!diag || !controls) return;
