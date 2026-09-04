@@ -16,13 +16,34 @@
     return visualsPromise;
   }
 
+  function normalizeConditionValue(value) {
+    return String(value ?? '').trim().toLowerCase();
+  }
+
+  function matchesVisualCondition(visual) {
+    const rawCondition = String(visual?.Condition_affichage || '').trim();
+    if (!rawCondition) return true;
+
+    const separatorIndex = rawCondition.indexOf('=');
+    if (separatorIndex <= 0) return false;
+
+    const field = rawCondition.slice(0, separatorIndex).trim();
+    const expected = rawCondition.slice(separatorIndex + 1).trim();
+    if (!field || !expected) return false;
+
+    const actual = typeof collected !== 'undefined' && collected
+      ? collected[field]
+      : '';
+    return normalizeConditionValue(actual) === normalizeConditionValue(expected);
+  }
+
   function findStepVisual(step) {
     const stepId = String(step?.Step_ID || '').trim();
     const procedureId = String(step?.Procedure_ID || '').trim();
     return visuals.find(visual => {
       const sameStep = String(visual.Step_ID || '').trim() === stepId;
       const visualProcedure = String(visual.Procedure_ID || '').trim();
-      return sameStep && (!visualProcedure || visualProcedure === procedureId);
+      return sameStep && (!visualProcedure || visualProcedure === procedureId) && matchesVisualCondition(visual);
     }) || null;
   }
 
