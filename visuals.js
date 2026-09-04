@@ -11,7 +11,7 @@
       .catch(error => {
         console.warn('TechDiag: impossible de charger les visuels terrain.', error);
         visuals = [];
-        return visualsPromise;
+        return visuals;
       });
     return visualsPromise;
   }
