@@ -144,7 +144,8 @@
     if (isInlineImage(visual)) appendInlineImage(card, visual);
     else appendVisualLink(card, visual);
 
-    document.getElementById('hint')?.insertAdjacentElement('afterend', card);
+    const anchor = document.getElementById('peakSettingAlert') || document.getElementById('hint');
+    anchor?.insertAdjacentElement('afterend', card);
   }
 
   const originalRenderStep = renderStep;

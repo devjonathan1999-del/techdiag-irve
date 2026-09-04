@@ -31,7 +31,8 @@ expectIncludes("image.alt = visual['Légende']", 'inline image alternative text 
 expectIncludes("link.target = '_blank'", 'new-tab link behavior');
 expectIncludes("link.rel = 'noopener noreferrer'", 'safe link behavior');
 expectIncludes('renderStepVisual', 'step-specific visual renderer');
-expectIncludes("document.getElementById('hint')?.insertAdjacentElement('afterend', card)", 'visual inserted after the descriptive hint');
+expectIncludes("document.getElementById('peakSettingAlert') || document.getElementById('hint')", 'visual anchor prefers the Peak setting alert when present');
+expectIncludes("anchor?.insertAdjacentElement('afterend', card)", 'visual inserted after the selected alert-or-hint anchor');
 expectExcludes("document.getElementById('question')?.insertAdjacentElement('afterend', card)", 'visual inserted directly after the question');
 expectExcludes('const STEP_VISUALS', 'hardcoded visual mapping');
 expectExcludes('data:image/png;base64,', 'embedded base64 image');
