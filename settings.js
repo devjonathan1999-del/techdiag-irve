@@ -37,7 +37,7 @@
   }
 
   function normalizedKva(value) {
-    const match = settingText(value).match(/^(\d+(?:[.,]\d+)?)\s*kva$/i);
+    const match = settingText(value).match(/(\d+(?:[.,]\d+)?)\s*kva\b/i);
     return match ? `${match[1].replace(',', '.')} kVA` : '';
   }
 
@@ -92,6 +92,76 @@
       value: expected,
       suffix: condition && !conditionInLabel ? ` — ${condition}` : '',
     };
+  }
+
+  function valueForElement(rows, element) {
+    const expected = settingText(element).toLowerCase();
+    const row = rows.find(item => settingText(item?.['Élément']).toLowerCase() === expected);
+    return row ? settingText(row['Valeur attendue']) : '';
+  }
+
+  function appendPeakSettingAlert(rows, stepId, configId, kva, supply) {
+    if (stepId !== 'SCHP-130' || configId !== 'SCH-CFG-PEAK-001' || !kva || !supply) return;
+
+    const current = valueForElement(rows, 'Réglage courant max');
+    const compatibility = valueForElement(rows, 'Compatibilité installation');
+    const ampsPerPhase = valueForElement(rows, 'Intensité par phase');
+    const powerWarning = valueForElement(rows, 'Alerte puissance');
+    const recommendation = valueForElement(rows, 'Préconisation');
+    const prohibited = /pose interdite/i.test(compatibility);
+    if (!prohibited && !current) return;
+
+    const alert = document.createElement('div');
+    alert.id = 'peakSettingAlert';
+    alert.className = `peak-setting-alert${prohibited ? ' prohibited' : powerWarning ? ' warning' : ''}`;
+    alert.style.marginTop = '18px';
+    alert.style.padding = '16px 18px';
+    alert.style.borderRadius = '14px';
+    alert.style.border = prohibited
+      ? '1px solid rgba(248,113,113,.65)'
+      : powerWarning
+        ? '1px solid rgba(251,191,36,.65)'
+        : '1px solid rgba(56,189,248,.55)';
+    alert.style.background = prohibited
+      ? 'rgba(127,29,29,.20)'
+      : powerWarning
+        ? 'rgba(120,53,15,.20)'
+        : 'rgba(14,165,233,.10)';
+
+    const title = document.createElement('strong');
+    title.className = 'peak-setting-alert-title';
+    title.style.display = 'block';
+    title.style.fontSize = '18px';
+    title.style.marginBottom = '8px';
+    title.textContent = prohibited
+      ? '⛔ POSE INTERDITE'
+      : `⚠️ RÉGLAGE PEAK CONTROLLER : ${current}`;
+    alert.appendChild(title);
+
+    const selected = document.createElement('div');
+    selected.className = 'peak-setting-alert-selection';
+    const supplyLabel = supply === 'tri' ? 'triphasé' : 'monophasé';
+    selected.textContent = `Abonnement sélectionné : ${kva} ${supplyLabel}${ampsPerPhase ? ` — ${ampsPerPhase} par phase` : ''}`;
+    alert.appendChild(selected);
+
+    if (powerWarning) {
+      const warning = document.createElement('div');
+      warning.className = 'peak-setting-alert-warning';
+      warning.style.marginTop = '8px';
+      warning.style.fontWeight = '700';
+      warning.textContent = powerWarning;
+      alert.appendChild(warning);
+    }
+
+    if (recommendation) {
+      const advice = document.createElement('div');
+      advice.className = 'peak-setting-alert-advice';
+      advice.style.marginTop = '4px';
+      advice.textContent = `Préconisation : ${recommendation}`;
+      alert.appendChild(advice);
+    }
+
+    document.getElementById('hint')?.insertAdjacentElement('afterend', alert);
   }
 
   function appendVisualLink(card, text, href) {
@@ -170,6 +240,7 @@
   async function renderSettingsReference(step) {
     const request = ++renderRequest;
     document.getElementById('settingsReference')?.remove();
+    document.getElementById('peakSettingAlert')?.remove();
 
     const stepId = settingText(step?.Step_ID);
     const configId = configIdForStep(step);
@@ -187,6 +258,8 @@
       matchesSelectedSupply(row, supply)
     );
     if (!rows.length) return;
+
+    appendPeakSettingAlert(rows, stepId, configId, kva, supply);
 
     const counts = new Map();
     rows.forEach(row => {
