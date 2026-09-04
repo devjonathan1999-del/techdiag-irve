@@ -3,6 +3,17 @@
     return String(value ?? '').trim();
   }
 
+  function applyStatusVocabulary() {
+    if (typeof statusClass !== 'function') return;
+    const originalStatusClass = statusClass;
+    statusClass = function(value) {
+      const status = norm(value);
+      if (status === 'valide') return 'valid';
+      if (status === 'en construction') return 'draft';
+      return originalStatusClass(value);
+    };
+  }
+
   function questionReadabilityClass(text) {
     const length = readabilityText(text).length;
     if (length > 180) return 'question dense';
@@ -59,6 +70,7 @@
   }
 
   window.questionReadabilityClass = questionReadabilityClass;
+  applyStatusVocabulary();
   ensureReadabilityStyles();
 
   if (typeof renderReference === 'function') {
