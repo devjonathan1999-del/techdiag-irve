@@ -95,8 +95,13 @@ test('F2M parameter module shows the CN12 wiring reference inline before Gavazzi
   assert.equal(images[0].src, 'assets/f2m/107/cablage-cn12.png');
   assert.match(images[0].alt, /câblage DPM \/ CN12/i);
 
-  const links = card.children.filter(node => node.tagName === 'a');
-  assert.deepEqual(links.map(link => link.textContent), [
+  const wiringLink = card.children.find(node => node.tagName === 'a' && node.children.some(child => child.tagName === 'img'));
+  assert.ok(wiringLink);
+  assert.equal(wiringLink.href, 'assets/f2m/107/cablage-cn12.png');
+  assert.match(wiringLink.textContent, /cliquer pour agrandir/);
+
+  const textLinks = card.children.filter(node => node.tagName === 'a' && !node.children.some(child => child.tagName === 'img'));
+  assert.deepEqual(textLinks.map(link => link.textContent), [
     '🖼️ Configuration Gavazzi monophasé',
     '🖼️ Configuration Gavazzi triphasé',
   ]);
