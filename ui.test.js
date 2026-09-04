@@ -90,6 +90,13 @@ test('compact cards omit repeated descriptions but search still finds hidden sym
   assert.doesNotMatch(app.get('catalogue').innerHTML, /Attente de charge différée/);
 });
 
+test('plain Validé procedure status renders the green badge class', () => {
+  const app = harness();
+  app.run("catalogue[1].Statut='Validé'; renderCatalogue()");
+  assert.match(app.get('catalogue').innerHTML, /badge valid">Validé<\/span>/);
+  assert.doesNotMatch(app.get('catalogue').innerHTML, /badge draft">Validé<\/span>/);
+});
+
 test('progress counts the travelled path rather than the position in the full graph', () => {
   const app = harness();
   app.run("startProcedure('A')");
