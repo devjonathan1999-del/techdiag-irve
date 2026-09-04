@@ -12,6 +12,7 @@ class Element {
     this.children = [];
     this.parentNode = null;
     this.textContent = '';
+    this.style = {};
   }
   appendChild(child) {
     child.parentNode = this;
@@ -33,11 +34,9 @@ class Element {
 }
 
 function harness(supply) {
-  const elements = new Map();
   const diag = new Element('diag');
   const contextRow = new Element('', 'diagnostic-context');
   diag.appendChild(contextRow);
-  elements.set('diag', diag);
 
   const descendants = node => [node, ...node.children.flatMap(descendants)];
   const document = {
