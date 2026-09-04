@@ -107,6 +107,41 @@
     card.appendChild(visualLink);
   }
 
+  function appendInlineVisual(card, href, alt, caption) {
+    const link = document.createElement('a');
+    link.href = href;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    link.style.display = 'block';
+    link.style.marginTop = '14px';
+    link.style.borderRadius = '14px';
+    link.style.overflow = 'hidden';
+    link.style.border = '1px solid rgba(56,189,248,.28)';
+    link.style.background = 'rgba(5,15,27,.72)';
+    link.style.textDecoration = 'none';
+
+    const image = document.createElement('img');
+    image.src = href;
+    image.alt = alt;
+    image.loading = 'lazy';
+    image.style.display = 'block';
+    image.style.width = '100%';
+    image.style.maxHeight = '560px';
+    image.style.objectFit = 'contain';
+    image.style.background = '#fff';
+    link.appendChild(image);
+
+    const label = document.createElement('div');
+    label.textContent = `${caption} · cliquer pour agrandir`;
+    label.style.padding = '10px 12px';
+    label.style.fontSize = '12px';
+    label.style.color = '#a8bad4';
+    label.style.textAlign = 'center';
+    link.appendChild(label);
+
+    card.appendChild(link);
+  }
+
   function appendF2mParameterWiring(card, stepId) {
     if (stepId !== 'F2MP-010') return;
 
@@ -124,10 +159,11 @@
     guidance.style.lineHeight = '1.5';
     card.appendChild(guidance);
 
-    appendVisualLink(
+    appendInlineVisual(
       card,
-      '🔌 Voir le schéma de câblage DPM / CN12',
-      'assets/f2m/107/cablage-cn12.png'
+      'assets/f2m/107/cablage-cn12.png',
+      'Schéma de câblage DPM / CN12',
+      'Schéma de câblage DPM / CN12'
     );
   }
 
