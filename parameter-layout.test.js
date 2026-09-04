@@ -14,6 +14,12 @@ class Element {
     this.children = [];
     this.parentNode = null;
     this.textContent = textContent;
+    const classes = new Set(String(className || '').split(/\s+/).filter(Boolean));
+    this.classList = {
+      add: (...names) => names.forEach(name => classes.add(name)),
+      remove: (...names) => names.forEach(name => classes.delete(name)),
+      contains: name => classes.has(name),
+    };
   }
   get lastElementChild() { return this.children.at(-1) || null; }
   appendChild(child) {
@@ -117,4 +123,31 @@ test('regular diagnostics keep their controls directly below the reference block
 
   const referenceIndex = app.diag.children.indexOf(app.reference);
   assert.equal(app.diag.children[referenceIndex + 1], app.controls);
+});
+
+test('parameter modules hide path history while diagnostics keep it available', () => {
+  const moduleIds = [
+    'VEST-PARAM-001',
+    'F2M-PARAM-001',
+    'SCH-PEAK-PARAM-001',
+    'HAG-PARAM-001',
+  ];
+
+  moduleIds.forEach(procedureId => {
+    const app = harness();
+    const history = app.elements.get('pathHistory');
+    history.classList.remove('hidden');
+    history.open = true;
+
+    app.context.window.positionParameterControls({ Procedure_ID:procedureId, Step_ID:'TEST-010' });
+
+    assert.equal(history.classList.contains('hidden'), true, `${procedureId} must hide path history`);
+    assert.equal(history.open, false, `${procedureId} must close path history`);
+  });
+
+  const diagnostic = harness();
+  const history = diagnostic.elements.get('pathHistory');
+  history.classList.remove('hidden');
+  diagnostic.context.window.positionParameterControls({ Procedure_ID:'IRVE-DIAG-001', Step_ID:'DISJ-100' });
+  assert.equal(history.classList.contains('hidden'), false, 'diagnostics must keep path history available');
 });
