@@ -129,7 +129,9 @@
     });
 
     card.appendChild(links);
-    const anchor = document.getElementById('settingsReference') || document.getElementById('meta');
+    const anchor = document.getElementById('pathHistory')
+      || document.getElementById('settingsReference')
+      || document.getElementById('meta');
     anchor?.insertAdjacentElement('afterend', card);
   }
 
