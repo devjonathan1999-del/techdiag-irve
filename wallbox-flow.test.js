@@ -38,7 +38,7 @@ const steps=[
   step('DISJ-443',443,'Action','Confirmation','correction_switch_rs485_wallbox','DISJ-444'),
   step('DISJ-444',444,'Question','Choix','reglage_courant_powerboost'),
   step('DISJ-445',445,'Action','Confirmation','correction_reglage_powerboost','DISJ-447'),
-  step('DISJ-446',446,'Action','Information','absence_gestion_dynamique_wallbox','END','Aucune gestion dynamique Wallbox n’est installée. Adapter l’installation : ajouter un Power Boost compatible ou limiter la puissance de charge à la puissance disponible de l’installation.','Installation à adapter'),
+  step('DISJ-446',446,'Action','Confirmation','absence_gestion_dynamique_wallbox','END','Aucune gestion dynamique Wallbox n’est installée. Adapter l’installation : ajouter un Power Boost compatible ou limiter la puissance de charge à la puissance disponible de l’installation.','Installation à adapter'),
   step('DISJ-447',447,'Question','Choix','test_fonctionnel_powerboost'),
   step('DISJ-448',448,'Orientation','Information','powerboost_fonctionnel','END','Gestion dynamique Wallbox Power Boost fonctionnelle.','Power Boost fonctionnel'),
   step('DISJ-449',449,'Action','Confirmation','escalade_powerboost_wallbox','END','Power Boost ne réagit pas malgré une implantation, une liaison de communication, un switch RS485 et un réglage conformes : escalader le dossier au support Wallbox. Ne pas conclure automatiquement à un remplacement de la borne.'),
