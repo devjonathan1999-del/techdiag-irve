@@ -82,6 +82,9 @@
     renderStep = function(step) {
       originalRenderStep(step);
       applyQuestionReadability(step);
+      if (typeof window?.scrollTo === 'function') {
+        window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+      }
     };
   }
 })();
