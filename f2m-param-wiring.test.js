@@ -79,7 +79,7 @@ function createHarness() {
   };
 }
 
-test('F2M parameter module shows the CN12 wiring reference before Gavazzi captures without termination guidance', async () => {
+test('F2M parameter module shows the CN12 wiring reference inline before Gavazzi captures without termination guidance', async () => {
   const app = createHarness();
   await app.render({ Step_ID:'F2MP-010', Unité:'F2M-CFG-107' });
 
@@ -90,13 +90,21 @@ test('F2M parameter module shows the CN12 wiring reference before Gavazzi captur
   assert.match(card.textContent, /continuité/);
   assert.doesNotMatch(card.textContent, /terminaison|120\s*Ω|résistance/i);
 
-  const links = card.children.filter(node => node.tagName === 'a');
-  assert.deepEqual(links.map(link => link.textContent), [
-    '🔌 Voir le schéma de câblage DPM / CN12',
+  const images = app.descendants().filter(node => node.tagName === 'img');
+  assert.equal(images.length, 1);
+  assert.equal(images[0].src, 'assets/f2m/107/cablage-cn12.png');
+  assert.match(images[0].alt, /câblage DPM \/ CN12/i);
+
+  const wiringLink = card.children.find(node => node.tagName === 'a' && node.children.some(child => child.tagName === 'img'));
+  assert.ok(wiringLink);
+  assert.equal(wiringLink.href, 'assets/f2m/107/cablage-cn12.png');
+  assert.match(wiringLink.textContent, /cliquer pour agrandir/);
+
+  const textLinks = card.children.filter(node => node.tagName === 'a' && !node.children.some(child => child.tagName === 'img'));
+  assert.deepEqual(textLinks.map(link => link.textContent), [
     '🖼️ Configuration Gavazzi monophasé',
     '🖼️ Configuration Gavazzi triphasé',
   ]);
-  assert.equal(links[0].href, 'assets/f2m/107/cablage-cn12.png');
 });
 
 test('error 107 keeps its existing settings links without duplicating the CN12 reference', async () => {
