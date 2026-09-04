@@ -16,6 +16,30 @@
     question.className = questionReadabilityClass(step?.['Instruction / question']);
   }
 
+  function agcpReferenceMeta() {
+    const phase = norm(collected?.type_alimentation || '');
+    if (phase.includes('tri')) return { needle: 'triphase', label: 'triphasé' };
+    if (phase.includes('mono')) return { needle: 'monophase', label: 'monophasé' };
+    return null;
+  }
+
+  function findAgcpReference(step) {
+    const key = norm((step?.['Instruction / question'] || '') + ' ' + (step?.['Donnée_collectée'] || ''));
+    if (!key.includes('calibre') && !key.includes('disjoncteur') && !key.includes('agcp')) return null;
+
+    const phase = agcpReferenceMeta();
+    const kva = extractNumber(collected?.puissance_souscrite);
+    if (!phase || kva === null) return null;
+
+    const procTitle = norm(activeProcedureTitle || '');
+    return references.find(ref => {
+      const diagnostic = norm(ref.Diagnostic);
+      const control = norm(ref['Contrôle']);
+      const diagnosticMatches = !diagnostic || procTitle.includes(diagnostic) || diagnostic.includes(procTitle);
+      return diagnosticMatches && control.includes(phase.needle) && control.includes(String(kva) + ' kva');
+    }) || null;
+  }
+
   function ensureReadabilityStyles() {
     if (!document?.createElement || !document?.head || document.getElementById('techdiag-readability-style')) return;
     const style = document.createElement('style');
@@ -35,6 +59,23 @@
 
   window.questionReadabilityClass = questionReadabilityClass;
   ensureReadabilityStyles();
+
+  if (typeof renderReference === 'function') {
+    const originalRenderReference = renderReference;
+    renderReference = function(step) {
+      const ref = findAgcpReference(step);
+      if (!ref) return originalRenderReference(step);
+
+      const box = document.getElementById('referenceCard');
+      const phase = agcpReferenceMeta();
+      const kva = extractNumber(collected?.puissance_souscrite);
+      const rule = str(ref['Règle conforme']);
+      if (!box || !phase || kva === null || !rule) return originalRenderReference(step);
+
+      box.className = 'manualcheck';
+      box.innerHTML = `<strong>⚡ Réglage attendu — ${esc(kva)} kVA ${esc(phase.label)}</strong><div>${esc(rule)}</div>`;
+    };
+  }
 
   if (typeof renderStep === 'function') {
     const originalRenderStep = renderStep;
