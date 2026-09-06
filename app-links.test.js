@@ -85,8 +85,7 @@ test('WAND-010 displays the Google Play app button before Continue', async () =>
   };
   app.context.currentStepId = step.Step_ID;
   app.context.renderStep(step);
-  await Promise.resolve();
-  await Promise.resolve();
+  await new Promise(resolve => setImmediate(resolve));
 
   const links = app.descendants(app.root).filter(node => node.tagName === 'a');
   assert.equal(links.length, 1);
