@@ -147,6 +147,10 @@ test('private, non-manufacturer, wrong-model and unsafe links are not shown', as
     doc('PRIVATE', 'SBCL-100', { Statut: 'Interne' }),
     doc('FORUM', 'SBCL-100', { Type: 'Forum' }),
     doc('OTHER', 'SBCL-100', { Titre: 'Autre fabricant', 'Périmètre': 'Autre borne' }),
+    doc('WRONG-MODEL', 'SBCL-100', {
+      Titre: 'Schneider Electric — autre modèle',
+      'Périmètre': 'Schneider Electric autre modèle',
+    }),
     doc('JS', 'SBCL-100', { URL: 'javascript:alert(1)' }),
     doc('EMPTY', 'SBCL-100', { URL: '' }),
   ]);

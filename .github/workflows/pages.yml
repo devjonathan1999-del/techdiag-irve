@@ -30,14 +30,11 @@ jobs:
         with:
           node-version: 20
 
-      - name: Test TechDiag
-        run: node --test ui.test.js user-view.test.js visual.test.js visual-condition.test.js peak-setting-alert.test.js peak-alert-order.test.js peak-settings-filter.test.js peak-context.test.js peak-flow-ui.test.js settings.test.js f2m-param-wiring.test.js parameter-layout.test.js documentation-order.test.js documentation-shared.test.js contextual-transition.test.js
-
       - name: Build TechDiag
         run: node build.js
 
-      - name: Test built summary
-        run: node --test summary.test.js
+      - name: Test TechDiag
+        run: node --test *.test.js
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
