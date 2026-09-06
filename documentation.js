@@ -1,5 +1,6 @@
 (() => {
   let manufacturerDocs = [], manufacturerDocsPromise = null, renderRequest = 0;
+  let appLinks = [], appLinksPromise = null, appRenderRequest = 0;
 
   const docNorm = value => String(value ?? '')
     .trim()
@@ -24,6 +25,25 @@
         return manufacturerDocs;
       });
     return manufacturerDocsPromise;
+  }
+
+  async function loadAppLinks() {
+    if (appLinksPromise) return appLinksPromise;
+    appLinksPromise = querySheet("Sources_Public")
+      .then(rows => {
+        appLinks = rows.filter(row => {
+          const isPublic = docNorm(row?.Statut) === 'public';
+          const isApplication = docNorm(row?.Type) === 'application';
+          return isPublic && isApplication && documentUrl(row?.URL);
+        });
+        return appLinks;
+      })
+      .catch(error => {
+        console.warn('TechDiag: impossible de charger les liens d’application publics.', error);
+        appLinks = [];
+        return appLinks;
+      });
+    return appLinksPromise;
   }
 
   function scopeMatches(doc, procedure) {
@@ -89,6 +109,20 @@
     });
   }
 
+  function findStepAppLinks(step) {
+    const stepId = String(step?.Step_ID || '').trim();
+    if (!stepId) return [];
+    const seenUrls = new Set();
+
+    return appLinks.filter(app => {
+      const assignedSteps = String(app.Step_IDs || '').trim().split(/[\s,;|]+/).filter(Boolean);
+      const url = documentUrl(app.URL);
+      if (!assignedSteps.includes(stepId) || !url || seenUrls.has(url)) return false;
+      seenUrls.add(url);
+      return true;
+    });
+  }
+
   async function renderManufacturerDocs(step) {
     const request = ++renderRequest;
     document.getElementById('manufacturerDocs')?.remove();
@@ -141,11 +175,57 @@
     anchor?.insertAdjacentElement('afterend', card);
   }
 
+  async function renderStepAppLinks(step) {
+    const request = ++appRenderRequest;
+    document.getElementById('stepAppLinks')?.remove();
+
+    const stepId = String(step?.Step_ID || '').trim();
+    if (!stepId) return;
+
+    await loadAppLinks();
+    if (request !== appRenderRequest || String(currentStepId || '').trim() !== stepId) return;
+
+    const apps = findStepAppLinks(step);
+    if (!apps.length) return;
+
+    const links = document.createElement('div');
+    links.id = 'stepAppLinks';
+    links.style.display = 'flex';
+    links.style.gap = '8px';
+    links.style.flexWrap = 'wrap';
+    links.style.margin = '0 0 14px';
+
+    apps.forEach(app => {
+      const appLink = document.createElement('a');
+      appLink.href = documentUrl(app.URL);
+      appLink.target = '_blank';
+      appLink.rel = 'noopener noreferrer';
+      appLink.textContent = app.Titre ? '📱 ' + app.Titre : '📱 Ouvrir l’application';
+      appLink.title = app.Titre || 'Ouvrir l’application';
+      appLink.style.display = 'inline-flex';
+      appLink.style.alignItems = 'center';
+      appLink.style.padding = '10px 13px';
+      appLink.style.border = '1px solid rgba(56,189,248,.35)';
+      appLink.style.borderRadius = '12px';
+      appLink.style.background = 'rgba(14,165,233,.10)';
+      appLink.style.color = '#dceaff';
+      appLink.style.fontWeight = '700';
+      appLink.style.textDecoration = 'none';
+      links.appendChild(appLink);
+    });
+
+    const controls = document.getElementById('controls');
+    if (controls) controls.insertAdjacentElement('beforebegin', links);
+    else document.getElementById('meta')?.insertAdjacentElement('afterend', links);
+  }
+
   const originalRenderStep = renderStep;
   renderStep = function(step) {
     originalRenderStep(step);
     renderManufacturerDocs(step);
+    renderStepAppLinks(step);
   };
 
   window.renderManufacturerDocs = renderManufacturerDocs;
+  window.renderStepAppLinks = renderStepAppLinks;
 })();
