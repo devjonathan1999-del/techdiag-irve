@@ -1,10 +1,6 @@
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
-const { execFileSync } = require('child_process');
-
-execFileSync(process.execPath, ['build.js'], { stdio: 'inherit' });
-execFileSync(process.execPath, ['--test', 'documentation.test.js', 'ui.test.js', 'summary.test.js'], { stdio: 'inherit' });
 
 const html = fs.readFileSync('dist/index.html', 'utf8');
 

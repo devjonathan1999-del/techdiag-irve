@@ -36,9 +36,15 @@
       if (scope.includes(model) || model.includes(scope)) return true;
       const scopeParts = scope.split(/[\/;,|]+/).map(value => value.trim()).filter(Boolean);
       if (scopeParts.some(part => model.includes(part) || part.includes(model))) return true;
+      return false;
     }
 
     return !!brand && title.includes(brand);
+  }
+
+  function isGenericProcedure(procedure) {
+    const brand = docNorm(procedure?.Marque);
+    return brand.includes('generique') || brand.includes('multimarque');
   }
 
   function documentUrl(value) {
@@ -72,7 +78,7 @@
       // An exact Step_ID assignment is authoritative, even when a generic
       // diagnostic temporarily routes into a manufacturer-specific branch.
       if (assignedSteps.length && !explicitlyAssigned) return false;
-      if (!assignedSteps.length && !scopeMatches(doc, procedure)) return false;
+      if (!scopeMatches(doc, procedure) && !(explicitlyAssigned && isGenericProcedure(procedure))) return false;
       const relevant = explicitlyAssigned
         || citedUrls.has(documentUrl(doc.URL))
         || citedIds.has(String(doc.Source_ID || '').trim());
