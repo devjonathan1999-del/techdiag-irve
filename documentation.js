@@ -71,6 +71,8 @@
     try {
       const url = new URL(String(value ?? '').trim());
       if (!['http:', 'https:'].includes(url.protocol)) return '';
+      const hostname = url.hostname.toLowerCase();
+      if (hostname === 'sharepoint.com' || hostname.endsWith('.sharepoint.com')) return '';
       // A citation to a PDF page still identifies the same public document.
       url.hash = '';
       return url.href;
